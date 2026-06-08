@@ -21,22 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const floatStreak = document.getElementById('attFloatStreak');
   const floatMonth  = document.getElementById('attFloatMonth');
 
-  // 반응형: 화면 폭에 따라 출석 위젯을 왼쪽 컬럼 ↔ 메인 슬롯으로 이동
-  //  - 데스크탑(1100px↑): streak 카드 바로 아래 (왼쪽 컬럼 안)
-  //  - 폰(1100px 미만):   메인 .phone 안 (왼쪽 컬럼은 통째로 숨겨지므로)
-  const leftCol     = document.getElementById('attFloat')?.parentElement; // .att-left-col
-  const mobileSlot  = document.getElementById('attMobileSlot');
-
   function placeWidget() {
-    if (!leftCol || !mobileSlot) return;
-    const isDesktop = window.innerWidth > 1100;
-    if (isDesktop) {
-      // 왼쪽 컬럼의 streak 카드 바로 뒤로
-      if (wrap.parentElement !== leftCol) leftCol.appendChild(wrap);
-    } else {
-      // 메인 슬롯 안으로
-      if (wrap.parentElement !== mobileSlot) mobileSlot.appendChild(wrap);
-    }
+    // 위젯 위치는 HTML에서 고정 — JS 이동 불필요
   }
 
   // 화면 전체 다시 그리기 (버튼 상태 + 숫자 + 캘린더)
@@ -61,14 +47,46 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCalendar();
   }
 
+  // 현재 캘린더 월 (0=현재달, -1=지난달 등)
+  let calOffset = 0;
+
+  // 이전/다음 달 이동 버튼 추가
+  function renderCalNav() {
+    const existing = document.getElementById('calNav');
+    if (existing) return;
+    const nav = document.createElement('div');
+    nav.id = 'calNav';
+    nav.className = 'cal-nav';
+    nav.innerHTML = `
+      <button type="button" class="cal-nav-btn" id="calPrev">‹</button>
+      <span class="cal-nav-month" id="calNavMonth"></span>
+      <button type="button" class="cal-nav-btn" id="calNext">›</button>
+    `;
+    calEl.parentElement.insertBefore(nav, calEl);
+    document.getElementById('calPrev').addEventListener('click', () => { calOffset--; renderCalendar(); });
+    document.getElementById('calNext').addEventListener('click', () => {
+      if (calOffset < 0) { calOffset++; renderCalendar(); }
+    });
+  }
+
   // 이번 달 캘린더 그리기
   function renderCalendar() {
+    renderCalNav();
     const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth(); // 0~11
-    const firstDay = new Date(year, month, 1).getDay(); // 1일의 요일 (0=일)
+    const base = new Date(now.getFullYear(), now.getMonth() + calOffset, 1);
+    const year = base.getFullYear();
+    const month = base.getMonth(); // 0~11
+    const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const todayDate = now.getDate();
+    const todayDate = (calOffset === 0) ? now.getDate() : -1;
+
+    // 다음달 버튼 비활성화 (현재달 이상 못 감)
+    const nextBtn = document.getElementById('calNext');
+    if (nextBtn) nextBtn.style.opacity = calOffset >= 0 ? '0.3' : '1';
+
+    // 월 표시 업데이트
+    const navMonth = document.getElementById('calNavMonth');
+    if (navMonth) navMonth.textContent = `${year}년 ${month + 1}월`;
 
     const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
     let html = '';
@@ -87,16 +105,23 @@ document.addEventListener('DOMContentLoaded', () => {
     for (let day = 1; day <= daysInMonth; day++) {
       const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const done = Records.isDone(key);
+      const hasMemo = typeof Memos !== 'undefined' && Memos.get(key);
       const isToday = day === todayDate;
       const cls = [
         'att-cal-cell',
         done ? 'done' : '',
-        isToday ? 'today' : ''
+        isToday ? 'today' : '',
+        hasMemo ? 'has-memo' : ''
       ].filter(Boolean).join(' ');
-      html += `<div class="${cls}">${done ? '🔥' : day}</div>`;
+      html += `<div class="${cls}" data-key="${key}" title="${hasMemo ? '메모 있음' : ''}">${done ? '🔥' : day}${hasMemo ? '<span class="cal-memo-dot"></span>' : ''}</div>`;
     }
 
     calEl.innerHTML = html;
+
+    // 날짜 클릭 → 메모 팝업
+    calEl.querySelectorAll('.att-cal-cell[data-key]').forEach(cell => {
+      cell.addEventListener('click', () => showMemoInput(cell.dataset.key));
+    });
 
     // 왼쪽 사이드 캘린더에도 동일하게 그려줌
     const sideCalEl = document.getElementById('attCalendarSide');
@@ -105,6 +130,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // 월 표시
     const sideCalMonth = document.getElementById('sideCalMonth');
     if (sideCalMonth) sideCalMonth.textContent = `${month + 1}월`;
+
+    // 이번달 운동 수 (현재 보는 달 기준)
+    const prefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+    const monthCount = Object.keys(Records.all()).filter(k => k.startsWith(prefix) && Records.all()[k]).length;
+    if (monthEl) monthEl.textContent = `${month + 1}월 ${monthCount}일 운동`;
   }
 
   // 버튼 클릭 → 오늘 토글
@@ -119,6 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
       void btn.offsetWidth;
       btn.classList.add('pop');
       launchConfetti();
+      showPlanBanner();
+      showMemoInput(todayKey()); // 메모 입력창 열기
     }
   });
 
@@ -153,6 +185,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
       setTimeout(() => el.remove(), 1600);
     }
+  }
+
+  // 운동 완료 후 "플랜 보기" 배너 show/hide
+  const planBanner = document.getElementById('attPlanBanner');
+  const planClose  = document.getElementById('attPlanClose');
+  if (planClose) {
+    planClose.addEventListener('click', () => {
+      if (planBanner) planBanner.style.display = 'none';
+    });
+  }
+  function showPlanBanner() {
+    if (!planBanner) return;
+    planBanner.style.display = 'flex';
+    setTimeout(() => { planBanner.style.display = 'none'; }, 6000);
+  }
+
+  // ===== 메모 팝업 =====
+  function showMemoInput(dateKey) {
+    // 기존 팝업 제거
+    const existing = document.getElementById('memoPopup');
+    if (existing) existing.remove();
+
+    const memo = (typeof Memos !== 'undefined') ? Memos.get(dateKey) : '';
+    const isToday = dateKey === todayKey();
+    const label = isToday ? '오늘' : dateKey.slice(5); // MM-DD
+
+    const popup = document.createElement('div');
+    popup.id = 'memoPopup';
+    popup.className = 'memo-popup';
+    popup.innerHTML = `
+      <div class="memo-popup-head">
+        <span class="memo-popup-date">${label} 운동 메모</span>
+        <button type="button" class="memo-popup-close" id="memoClose">×</button>
+      </div>
+      <textarea class="memo-textarea" id="memoText" placeholder="오늘 운동 어땠나요? (PR, 컨디션, 느낀 점...)" maxlength="100">${memo}</textarea>
+      <div class="memo-popup-foot">
+        <span class="memo-char" id="memoChar">${memo.length}/100</span>
+        <button type="button" class="memo-save-btn" id="memoSave">저장</button>
+      </div>
+    `;
+
+    const phone = document.querySelector('.phone') || document.body;
+    phone.appendChild(popup);
+
+    const textarea = popup.querySelector('#memoText');
+    const charEl   = popup.querySelector('#memoChar');
+    textarea.focus();
+
+    textarea.addEventListener('input', () => {
+      charEl.textContent = `${textarea.value.length}/100`;
+    });
+
+    popup.querySelector('#memoClose').addEventListener('click', () => popup.remove());
+
+    popup.querySelector('#memoSave').addEventListener('click', () => {
+      if (typeof Memos !== 'undefined') Memos.set(dateKey, textarea.value);
+      popup.remove();
+      render(); // 캘린더 메모 점 갱신
+    });
   }
 
   placeWidget();

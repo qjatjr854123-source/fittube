@@ -45,6 +45,26 @@
     <!-- 프로필 본체 — JS가 채움 -->
     <section id="profileBody"></section>
 
+    <!-- 운동 알림 설정 -->
+    <section class="notif-section">
+      <div class="pf-section-title">🔔 운동 알림 설정</div>
+      <div class="notif-card">
+        <div class="notif-row">
+          <span class="notif-label">알림 시간</span>
+          <input type="time" id="notifTime" class="notif-time-input" value="07:00">
+        </div>
+        <div class="notif-row">
+          <span class="notif-label">알림 켜기</span>
+          <label class="notif-switch">
+            <input type="checkbox" id="notifToggle">
+            <span class="notif-slider"></span>
+          </label>
+        </div>
+        <button type="button" class="notif-save-btn" id="notifSave">알림 저장</button>
+        <div class="notif-status" id="notifStatus"></div>
+      </div>
+    </section>
+
     <div class="page-actions">
       <button class="nav-btn nav-btn-prev" onclick="goTo('index.html')">← 홈으로</button>
     </div>
@@ -70,5 +90,6 @@
   <script src="firebase-config.js"></script>
   <script src="shared.js"></script>
   <script src="profile.js"></script>
+  <script src="notif.js"></script>
 </body>
 </html>

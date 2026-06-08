@@ -14,54 +14,70 @@
 <link rel="stylesheet" href="login.css">
 </head>
 <body class="login-body">
-  <!-- 배경 그라데이션 원 -->
   <div class="login-bg-circle login-bg-circle-1"></div>
   <div class="login-bg-circle login-bg-circle-2"></div>
+  <div class="login-bg-grid"></div>
 
   <div class="login-phone">
     <div class="login-inner">
 
-      <!-- 아이콘 + 로고 -->
-      <div class="login-icon">
-        <div class="login-icon-box">F</div>
+      <div class="login-brand">
+        <div class="login-icon-box">
+          <svg viewBox="0 0 40 40" width="36" height="36" fill="none">
+            <path d="M8 10 L20 6 L32 10 L32 22 Q32 32 20 36 Q8 32 8 22 Z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <path d="M16 18 L16 26 L26 22 Z" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="login-brand-text">
+          <div class="login-logo">회원가입</div>
+          <div class="login-tagline">FitTube와 함께 시작해요</div>
+        </div>
       </div>
 
-      <header class="login-header">
-        <div class="login-logo">회원가입</div>
-        <div class="login-tagline">
-          FitTube 시작을 위한 정보를 입력해주세요.<br>
-          모든 정보는 기기에만 저장됩니다.
-        </div>
-      </header>
-
-      <!-- 회원가입 카드 -->
       <section class="login-card">
+        <div class="login-card-title">새 계정 만들기</div>
         <form id="signupForm" class="login-form" autocomplete="off" onsubmit="return false;">
-          <div class="login-field">
-            <label for="signupId">아이디 <span class="login-required">필수</span></label>
-            <input type="text" id="signupId" placeholder="3자 이상 영문/숫자" autocomplete="off">
-          </div>
 
           <div class="login-field">
-            <label for="signupEmail">이메일 <span class="login-optional">선택</span></label>
-            <input type="email" id="signupEmail" placeholder="example@email.com" autocomplete="off">
+            <label for="signupEmail">이메일 <span class="login-required">필수</span></label>
+            <div class="login-input-wrap">
+              <svg class="login-input-icon" viewBox="0 0 20 20" fill="none">
+                <rect x="2" y="5" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M2 8l8 5 8-5" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+              <input type="email" id="signupEmail" placeholder="example@email.com" autocomplete="off">
+            </div>
           </div>
 
           <div class="login-field">
             <label for="signupPw">비밀번호 <span class="login-required">필수</span></label>
-            <input type="password" id="signupPw" placeholder="4자 이상" autocomplete="off">
+            <div class="login-input-wrap">
+              <svg class="login-input-icon" viewBox="0 0 20 20" fill="none">
+                <rect x="4" y="9" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M7 9V6.5a3 3 0 0 1 6 0V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="10" cy="13.5" r="1.2" fill="currentColor"/>
+              </svg>
+              <input type="password" id="signupPw" placeholder="6자 이상" autocomplete="off">
+            </div>
           </div>
 
           <div class="login-field">
             <label for="signupPwConfirm">비밀번호 확인 <span class="login-required">필수</span></label>
-            <input type="password" id="signupPwConfirm" placeholder="다시 한 번 입력" autocomplete="off">
+            <div class="login-input-wrap">
+              <svg class="login-input-icon" viewBox="0 0 20 20" fill="none">
+                <rect x="4" y="9" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M7 9V6.5a3 3 0 0 1 6 0V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="10" cy="13.5" r="1.2" fill="currentColor"/>
+              </svg>
+              <input type="password" id="signupPwConfirm" placeholder="비밀번호 다시 입력" autocomplete="off">
+            </div>
           </div>
 
           <div class="login-field login-checkbox-field">
             <label class="login-checkbox-label">
               <input type="checkbox" id="signupAgree">
               <span class="login-checkbox-text">
-                <a href="terms.html" class="login-terms-link">이용약관</a>·
+                <a href="terms.html" class="login-terms-link">이용약관</a> ·
                 <a href="terms.html" class="login-terms-link">개인정보 처리방침</a>에 동의합니다
               </span>
             </label>
@@ -69,7 +85,12 @@
 
           <div class="login-error" id="signupError" style="display:none;"></div>
 
-          <button type="button" class="login-btn" id="signupBtn">가입하기</button>
+          <button type="button" class="login-btn" id="signupBtn">
+            <span>가입하기</span>
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none">
+              <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
 
           <div class="login-sub-actions">
             <span class="login-link-text">이미 계정이 있나요?</span>
@@ -78,21 +99,18 @@
         </form>
       </section>
 
-      <!-- 개인정보 안내 -->
       <div class="login-privacy">
-        <div class="login-privacy-title">개인정보 안내</div>
-        <div class="login-privacy-row">
-          <span class="lp-check">✅</span>
-          <span class="lp-text">기기에만 저장</span>
-          <span class="lp-sep">·</span>
-          <span class="lp-cross">❌</span>
-          <span class="lp-text">서버 전송 없음</span>
-        </div>
+        <span class="lp-item"><span>✅</span> 다기기 로그인 가능</span>
+        <span class="lp-sep">·</span>
+        <span class="lp-item"><span>🔒</span> Firebase 보안</span>
       </div>
 
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
   <script src="shared.js"></script>
   <script src="signup.js"></script>
 </body>

@@ -19,9 +19,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const graphD     = document.getElementById('wtGraphDesktop'); // 데스크탑 카드
   const floatLatest = document.getElementById('wtFloatLatest');
   const floatFoot   = document.getElementById('wtFloatFoot');
+  const goalInput  = document.getElementById('wtGoalInput');
+  const goalSave   = document.getElementById('wtGoalSave');
+  const goalDiff   = document.getElementById('wtGoalDiff');
+  const filterTabs = document.querySelectorAll('.wt-filter-tab');
+
+  let currentRange = 7; // 기본 1주
+
+  filterTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      filterTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentRange = parseInt(tab.dataset.range);
+      render();
+    });
+  });
 
   // SVG 선 그래프 생성 — data: [{date, kg}, ...]
-  function buildGraph(data, w, h) {
+  function buildGraph(data, w, h, goalKg) {
     if (!data.length) return '';
 
     const padL = 10, padR = 10, padT = 14, padB = 20;
@@ -29,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const innerH = h - padT - padB;
 
     const kgs = data.map(d => d.kg);
+    if (goalKg) kgs.push(goalKg); // 목표값도 범위에 포함
     let min = Math.min(...kgs);
     let max = Math.max(...kgs);
     if (min === max) { min -= 1; max += 1; }
@@ -87,14 +103,23 @@ document.addEventListener('DOMContentLoaded', () => {
         <path d="${areaD}" fill="url(#wtFill${w})"/>
         <path d="${pathD}" fill="none" stroke="#ff0033" stroke-width="2.5"
               stroke-linecap="round" stroke-linejoin="round" filter="url(#wtGlow${w})"/>
+        ${goalKg ? `
+          <line x1="${padL}" y1="${toY(goalKg).toFixed(1)}" x2="${(padL+innerW)}" y2="${toY(goalKg).toFixed(1)}"
+                stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.8"/>
+          <text x="${(padL+innerW)}" y="${(toY(goalKg)-3).toFixed(1)}" text-anchor="end"
+                font-size="8" fill="#00d4ff" font-family="monospace">목표 ${goalKg}kg</text>` : ''}
         ${circles}
         ${dateLabels}
       </svg>`;
   }
 
   function render() {
-    const data = Weights.recent(14); // 최근 14개
+    const data = currentRange === 0 ? Weights.sorted() : Weights.recent(currentRange);
     const latest = Weights.sorted().slice(-1)[0];
+    const goalKg = Store.get(STORAGE_KEYS.WEIGHT_GOAL);
+
+    // 목표 체중 input 에 채워두기
+    if (goalInput && goalKg) goalInput.value = goalKg;
 
     // 최신 체중 표시
     const latestText = latest ? `${latest.kg} kg` : '-- kg';
@@ -105,8 +130,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const today = Weights.getToday();
     if (today != null && input) input.value = today;
 
+    // 목표 차이 표시
+    if (goalDiff) {
+      if (goalKg && latest) {
+        const diff = (latest.kg - goalKg).toFixed(1);
+        if (Math.abs(diff) < 0.1) {
+          goalDiff.textContent = '🎉 목표 달성!';
+          goalDiff.className = 'wt-goal-diff reached';
+        } else if (diff > 0) {
+          goalDiff.textContent = `목표까지 -${diff}kg`;
+          goalDiff.className = 'wt-goal-diff down';
+        } else {
+          goalDiff.textContent = `목표까지 +${Math.abs(diff)}kg`;
+          goalDiff.className = 'wt-goal-diff up';
+        }
+      } else {
+        goalDiff.textContent = '';
+      }
+    }
+
     if (!data.length) {
-      // 기록 없음
       if (emptyEl)  emptyEl.style.display = 'block';
       if (graphM)   graphM.innerHTML = '';
       if (graphD)   graphD.innerHTML = '<div class="wt-empty-mini">기록 없음</div>';
@@ -114,7 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // 점 1개 — 그래프 대신 "하루 더 기록하면 변화가 보여요" 안내
     if (data.length === 1) {
       if (emptyEl) emptyEl.style.display = 'none';
       const oneMsg = `<div class="wt-empty-mini">📍 ${data[0].kg}kg 기록됨<br>하루 더 재면 변화 그래프가 그려져요</div>`;
@@ -126,9 +168,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (emptyEl) emptyEl.style.display = 'none';
 
-    // 그래프 그리기 (폰/데스크탑 각각 크기 다름)
-    if (graphM) graphM.innerHTML = buildGraph(data, 300, 90);
-    if (graphD) graphD.innerHTML = buildGraph(data, 220, 110);
+    // 그래프 그리기 — 목표선 포함
+    if (graphM) graphM.innerHTML = buildGraph(data, 300, 90, goalKg);
+    if (graphD) graphD.innerHTML = buildGraph(data, 220, 110, goalKg);
 
     // 데스크탑 카드 하단 — 변화량
     if (floatFoot && data.length >= 2) {
@@ -160,8 +202,50 @@ document.addEventListener('DOMContentLoaded', () => {
   saveBtn.addEventListener('click', save);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); });
 
+  // 최근 기록 목록 + 삭제 버튼
+  const historyEl = document.getElementById('wtHistory');
+  function renderHistory() {
+    if (!historyEl) return;
+    const data = Weights.sorted().slice(-5).reverse(); // 최근 5개 역순
+    if (!data.length) { historyEl.innerHTML = ''; return; }
+    historyEl.innerHTML = data.map(d => `
+      <div class="wt-hist-row">
+        <span class="wt-hist-date">${d.date.slice(5)}</span>
+        <span class="wt-hist-kg">${d.kg} kg</span>
+        <button type="button" class="wt-hist-del" data-date="${d.date}" title="삭제">×</button>
+      </div>`).join('');
+
+    historyEl.querySelectorAll('.wt-hist-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        Weights.remove(btn.dataset.date);
+        render();
+        if (typeof window.refreshBadges === 'function') window.refreshBadges();
+      });
+    });
+  }
+
+  // 목표 체중 저장
+  if (goalSave) {
+    goalSave.addEventListener('click', () => {
+      const kg = parseFloat(goalInput.value);
+      if (!kg || kg < 20 || kg > 300) {
+        goalInput.classList.add('wt-input-error');
+        setTimeout(() => goalInput.classList.remove('wt-input-error'), 500);
+        return;
+      }
+      Store.set(STORAGE_KEYS.WEIGHT_GOAL, kg);
+      render();
+      goalSave.textContent = '설정됨 ✓';
+      setTimeout(() => { goalSave.textContent = '설정'; }, 1200);
+    });
+    if (goalInput) {
+      goalInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') goalSave.click(); });
+    }
+  }
+
   // 다른 스크립트(analysis.js)가 체중을 자동 저장한 뒤 그래프 갱신용
-  window.refreshWeightGraph = render;
+  window.refreshWeightGraph = () => { render(); renderHistory(); };
 
   render();
+  renderHistory();
 });

@@ -1,12 +1,12 @@
 /* ============================================
-   FitTube — 로그인 페이지 (v2)
+   FitTube — 로그인 페이지 (v3)
    ============================================ */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 .login-body {
   min-height: 100vh;
-  background: #0a0a0e;
+  background: #080810;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -20,25 +20,41 @@
 .login-bg-circle {
   position: fixed;
   border-radius: 50%;
-  filter: blur(80px);
+  filter: blur(100px);
   pointer-events: none;
   z-index: 0;
 }
-
 .login-bg-circle-1 {
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(255, 0, 51, 0.4) 0%, transparent 70%);
-  top: -100px;
-  right: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(255,0,51,0.35) 0%, transparent 70%);
+  top: -150px; right: -150px;
+  animation: floatA 8s ease-in-out infinite;
+}
+.login-bg-circle-2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(0,212,255,0.12) 0%, transparent 70%);
+  bottom: -100px; left: -100px;
+  animation: floatB 10s ease-in-out infinite;
+}
+@keyframes floatA {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-30px, 20px); }
+}
+@keyframes floatB {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(20px, -30px); }
 }
 
-.login-bg-circle-2 {
-  width: 350px;
-  height: 350px;
-  background: radial-gradient(circle, rgba(0, 200, 100, 0.15) 0%, transparent 70%);
-  bottom: -80px;
-  left: -80px;
+/* 배경 그리드 */
+.login-bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
 }
 
 /* 폰 카드 */
@@ -46,75 +62,118 @@
   position: relative;
   z-index: 10;
   width: 100%;
-  max-width: 380px;
-  background: linear-gradient(180deg, rgba(26, 26, 31, 0.85) 0%, rgba(13, 13, 16, 0.95) 100%);
+  max-width: 390px;
+  background: linear-gradient(160deg, rgba(22,22,30,0.95) 0%, rgba(10,10,16,0.98) 100%);
   border-radius: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255,255,255,0.07);
   box-shadow:
-    0 30px 80px rgba(0, 0, 0, 0.7),
-    0 0 0 1px rgba(255, 0, 51, 0.08);
+    0 40px 100px rgba(0,0,0,0.8),
+    0 0 0 1px rgba(255,0,51,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.05);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   overflow: hidden;
 }
 
-.login-inner {
-  padding: 40px 24px 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
+/* 상단 빨간 라인 */
+.login-phone::before {
+  content: '';
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, #ff0033 0%, #ff6688 50%, transparent 100%);
 }
 
-/* 빨간 F 아이콘 박스 */
-.login-icon {
+.login-inner {
+  padding: 32px 24px 28px;
   display: flex;
-  justify-content: flex-start;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 브랜드 헤더 */
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .login-icon-box {
   width: 64px;
   height: 64px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #ff0033 0%, #ff3355 100%);
+  border-radius: 20px;
+  background: linear-gradient(135deg, #ff0033 0%, #cc0028 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 36px;
-  font-weight: 900;
-  font-style: italic;
-  letter-spacing: -2px;
+  flex-shrink: 0;
   box-shadow:
-    0 12px 30px rgba(255, 0, 51, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    0 12px 32px rgba(255,0,51,0.6),
+    0 0 0 1px rgba(255,255,255,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.25);
 }
 
-/* 헤더 */
-.login-header {
-  text-align: left;
-}
+.login-brand-text { display: flex; flex-direction: column; gap: 3px; }
 
 .login-logo {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 900;
   color: #fff;
   letter-spacing: -1px;
-  margin-bottom: 10px;
+  line-height: 1;
 }
 
 .login-tagline {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.6;
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.3px;
+}
+
+/* 앱 특징 3개 */
+.login-features {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 12px 0;
+  overflow: hidden;
+}
+.login-feature {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.lf-icon { font-size: 20px; line-height: 1; }
+.lf-text {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
   letter-spacing: 0.2px;
+}
+.login-feature-sep {
+  width: 1px;
+  height: 32px;
+  background: rgba(255,255,255,0.08);
+  flex-shrink: 0;
 }
 
 /* 로그인 카드 */
 .login-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 22px 18px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 18px;
+  padding: 20px 18px;
+}
+
+.login-card-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
 }
 
 /* 폼 */
@@ -133,56 +192,82 @@
 .login-field label {
   font-size: 11px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.55);
-  letter-spacing: 0.3px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* 입력 래퍼 (아이콘 + input) */
+.login-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-input-icon {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: rgba(255,255,255,0.25);
+  pointer-events: none;
+  flex-shrink: 0;
 }
 
 .login-field input {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 12px 14px;
-  font-size: 13px;
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px;
+  padding: 13px 14px 13px 38px;
+  font-size: 14px;
   color: #fff;
   font-family: inherit;
-  transition: border-color 0.2s ease, background 0.2s ease;
-  width: 100%;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
 }
 
-.login-field input::placeholder {
-  color: rgba(255, 255, 255, 0.25);
-}
+.login-field input::placeholder { color: rgba(255,255,255,0.2); }
 
 .login-field input:focus {
   outline: none;
-  border-color: rgba(255, 0, 51, 0.5);
-  background: rgba(255, 0, 51, 0.04);
+  border-color: rgba(255,0,51,0.7);
+  background: rgba(255,0,51,0.06);
+  box-shadow: 0 0 0 3px rgba(255,0,51,0.15), 0 0 16px rgba(255,0,51,0.1);
+}
+.login-field input:focus + .login-input-icon,
+.login-input-wrap:focus-within .login-input-icon {
+  color: rgba(255,0,51,0.6);
 }
 
 .login-field input.login-input-error {
   border-color: #ff0033;
-  background: rgba(255, 0, 51, 0.06);
+  background: rgba(255,0,51,0.06);
   animation: loginShake 0.4s ease;
 }
 
 @keyframes loginShake {
   0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
 
 .login-error {
-  font-size: 11px;
-  color: #ff0033;
-  background: rgba(255, 0, 51, 0.08);
-  border-left: 2px solid #ff0033;
-  padding: 8px 10px;
-  border-radius: 6px;
+  font-size: 12px;
+  color: #ff6680;
+  background: rgba(255,0,51,0.08);
+  border: 1px solid rgba(255,0,51,0.2);
+  border-radius: 8px;
+  padding: 9px 12px;
+  line-height: 1.5;
 }
 
 /* 로그인 버튼 */
 .login-btn {
-  background: linear-gradient(135deg, #ff0033 0%, #ff3355 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #ff0033 0%, #cc0028 100%);
   color: #fff;
   font-size: 14px;
   font-weight: 800;
@@ -190,55 +275,45 @@
   border: none;
   border-radius: 12px;
   cursor: pointer;
-  letter-spacing: 0.5px;
-  margin-top: 6px;
-  box-shadow:
-    0 8px 20px rgba(255, 0, 51, 0.4),
-    0 0 0 1px rgba(255, 0, 51, 0.2) inset;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  letter-spacing: 0.3px;
+  margin-top: 4px;
+  box-shadow: 0 8px 24px rgba(255,0,51,0.45);
+  transition: transform 0.15s, box-shadow 0.15s;
   font-family: inherit;
+  width: 100%;
 }
-
 .login-btn:hover {
-  transform: translateY(-1px);
-  box-shadow:
-    0 12px 28px rgba(255, 0, 51, 0.55),
-    0 0 0 1px rgba(255, 0, 51, 0.3) inset;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(255,0,51,0.55);
 }
-
-.login-btn:active {
-  transform: translateY(0);
-}
-
+.login-btn:active { transform: translateY(0); }
 .login-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none !important;
 }
 
-/* 구분선 (또는) */
+/* 구분선 */
 .login-divider {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 4px 0;
+  margin: 2px 0;
 }
-
 .login-divider::before,
 .login-divider::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255,255,255,0.08);
 }
-
 .login-divider span {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255,255,255,0.3);
   letter-spacing: 1px;
 }
 
-/* 구글로 시작하기 버튼 — 흰 배경 (구글 브랜드 가이드 관례) */
+/* 구글 버튼 */
 .login-google-btn {
   display: flex;
   align-items: center;
@@ -246,36 +321,26 @@
   gap: 10px;
   width: 100%;
   background: #fff;
-  color: #1f1f1f;
-  font-size: 13.5px;
+  color: #1a1a1a;
+  font-size: 13px;
   font-weight: 700;
   padding: 13px 20px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: none;
   border-radius: 12px;
   cursor: pointer;
   font-family: inherit;
-  letter-spacing: 0.2px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
-
 .login-google-btn:hover {
-  transform: translateY(-1px);
   background: #f5f5f5;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
 }
-
-.login-google-btn:active {
-  transform: translateY(0);
-}
-
 .login-google-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none !important;
-}
-
-.login-google-btn .g-logo {
-  flex-shrink: 0;
 }
 
 /* 보조 액션 */
@@ -284,85 +349,50 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 2px;
 }
-
 .login-link {
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
   text-decoration: none;
-  letter-spacing: 0.2px;
-  transition: color 0.2s ease;
+  transition: color 0.2s;
 }
+.login-link:hover { color: #ff0033; }
+.login-sep { color: rgba(255,255,255,0.15); font-size: 11px; }
 
-.login-link:hover {
-  color: #ff0033;
-}
-
-.login-sep {
-  color: rgba(255, 255, 255, 0.2);
-  font-size: 11px;
-}
-
-/* 개인정보 안내 박스 */
+/* 개인정보 안내 */
 .login-privacy {
-  text-align: center;
-  padding: 16px 12px;
-  background: rgba(0, 200, 100, 0.04);
-  border: 1px solid rgba(0, 200, 100, 0.12);
-  border-radius: 12px;
-}
-
-.login-privacy-title {
-  font-size: 11px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.45);
-  letter-spacing: 1px;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
-}
-
-.login-privacy-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 10px;
+  gap: 8px;
   flex-wrap: wrap;
+  padding: 12px;
+  background: rgba(0,255,136,0.03);
+  border: 1px solid rgba(0,255,136,0.08);
+  border-radius: 10px;
 }
-
-.lp-check, .lp-cross {
-  font-size: 13px;
+.lp-item {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
-
-.lp-sep {
-  color: rgba(255, 255, 255, 0.2);
-}
-
-.lp-text {
-  color: rgba(255, 255, 255, 0.65);
-}
-
+.lp-sep { color: rgba(255,255,255,0.15); font-size: 10px; }
 .login-terms-link {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255,255,255,0.4);
   text-decoration: underline;
   text-underline-offset: 2px;
-  letter-spacing: 0.2px;
 }
-
-.login-terms-link:hover {
-  color: #ff0033;
-}
+.login-terms-link:hover { color: #ff0033; }
 
 /* 모바일 */
 @media (max-width: 420px) {
-  .login-inner { padding: 32px 20px 24px; }
-  .login-logo { font-size: 32px; }
-  .login-icon-box { width: 56px; height: 56px; font-size: 30px; }
+  .login-inner { padding: 28px 18px 24px; }
+  .login-logo { font-size: 24px; }
+  .login-icon-box { width: 48px; height: 48px; border-radius: 14px; }
 }
 
 /* ============================================
@@ -385,9 +415,9 @@
   display: inline-block;
   font-size: 9px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
   padding: 1px 5px;
   border-radius: 4px;
   margin-left: 4px;
@@ -419,13 +449,13 @@
 
 .login-checkbox-text {
   font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(255,255,255,0.65);
   line-height: 1.5;
 }
 
 .login-link-text {
   font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255,255,255,0.4);
   letter-spacing: 0.2px;
 }
 

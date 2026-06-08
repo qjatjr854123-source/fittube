@@ -86,10 +86,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const analyzeBtn = document.getElementById('analyzeBtn');
   if (analyzeBtn) {
     analyzeBtn.addEventListener('click', () => {
+      if (!Store.getPhoto()) {
+        const warn = document.getElementById('photoWarning');
+        if (warn) warn.style.display = 'block';
+        document.getElementById('uploadBox')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
       setTimeout(() => {
         saveAnalysisToStorage();
         showNextAction();
-      }, 1800);
+      }, 500);
     });
   }
 

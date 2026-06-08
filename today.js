@@ -116,16 +116,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }[c]));
   }
 
-  // 반응형: 데스크탑은 왼쪽 컬럼(원위치), 폰은 메인 슬롯으로 이동
-  //  - wrap(#todayPick)의 원래 부모 = 왼쪽 컬럼 (.att-left-col)
-  const desktopParent = wrap.parentElement;
-  const mobileSlot    = document.getElementById('todayMobileSlot');
-  function placeWidget() {
-    const target = window.innerWidth > 1100 ? desktopParent : mobileSlot;
-    if (target && wrap.parentElement !== target) target.appendChild(wrap);
-  }
-
-  placeWidget();
   render();
-  window.addEventListener('resize', placeWidget);
 });

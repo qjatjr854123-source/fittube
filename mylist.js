@@ -49,16 +49,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     emptyEl.style.display = 'none';
 
-    itemsEl.innerHTML = list.map((item, i) => `
-      <li class="ml-item ${item.done ? 'done' : ''}">
-        <button type="button" class="ml-check" data-toggle="${i}" aria-label="완료">
-          ${item.done ? '✓' : ''}
-        </button>
-        <span class="ml-name">${escapeHtml(item.name)}</span>
-        <a class="ml-video" href="${workoutVideoUrl(item.name)}" target="_blank" rel="noopener" title="자세 영상 보기">▶</a>
-        <button type="button" class="ml-del" data-del="${i}" aria-label="삭제">×</button>
-      </li>
-    `).join('');
+    itemsEl.innerHTML = list.map((item, i) => {
+      const sets = item.sets || '';
+      const reps = item.reps || '';
+      const setInfo = (sets || reps) ? `<span class="ml-setinfo">${sets ? sets+'세트' : ''} ${reps ? reps+'회' : ''}</span>` : `<span class="ml-setinfo-empty" data-edit="${i}">+ 세트/횟수</span>`;
+      return `
+        <li class="ml-item ${item.done ? 'done' : ''}">
+          <button type="button" class="ml-check" data-toggle="${i}" aria-label="완료">
+            ${item.done ? '✓' : ''}
+          </button>
+          <div class="ml-info">
+            <span class="ml-name">${escapeHtml(item.name)}</span>
+            <span class="ml-setwrap" data-edit="${i}">${setInfo}</span>
+          </div>
+          <a class="ml-video" href="${workoutVideoUrl(item.name)}" target="_blank" rel="noopener" title="자세 영상 보기">▶</a>
+          <button type="button" class="ml-del" data-del="${i}" aria-label="삭제">×</button>
+        </li>`;
+    }).join('');
   }
 
   // 사용자 입력을 HTML에 넣을 때 안전하게 (태그 주입 방지)
@@ -66,6 +73,49 @@ document.addEventListener('DOMContentLoaded', () => {
     return String(s).replace(/[&<>"']/g, c => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[c]));
+  }
+
+  // ===== 세트/횟수 편집 팝업 =====
+  function showSetEditor(index) {
+    const existing = document.getElementById('setEditorPopup');
+    if (existing) existing.remove();
+
+    const list = MyList.all();
+    const item = list[index];
+    if (!item) return;
+
+    const popup = document.createElement('div');
+    popup.id = 'setEditorPopup';
+    popup.className = 'set-editor-popup';
+    popup.innerHTML = `
+      <div class="set-editor-head">
+        <span class="set-editor-title">${escapeHtml(item.name)}</span>
+        <button type="button" class="set-editor-close" id="setEditorClose">×</button>
+      </div>
+      <div class="set-editor-row">
+        <label class="set-editor-label">세트</label>
+        <input type="number" class="set-editor-input" id="setInput" min="1" max="20" value="${item.sets || ''}" placeholder="3">
+      </div>
+      <div class="set-editor-row">
+        <label class="set-editor-label">횟수</label>
+        <input type="number" class="set-editor-input" id="repInput" min="1" max="200" value="${item.reps || ''}" placeholder="10">
+      </div>
+      <button type="button" class="set-editor-save" id="setEditorSave">저장</button>
+    `;
+
+    const phone = document.querySelector('.phone') || document.body;
+    phone.appendChild(popup);
+
+    popup.querySelector('#setEditorClose').addEventListener('click', () => popup.remove());
+    popup.querySelector('#setEditorSave').addEventListener('click', () => {
+      const sets = parseInt(popup.querySelector('#setInput').value) || null;
+      const reps = parseInt(popup.querySelector('#repInput').value) || null;
+      const l = MyList.all();
+      if (l[index]) { l[index].sets = sets; l[index].reps = reps; }
+      Store.set(STORAGE_KEYS.MYLIST, l);
+      popup.remove();
+      render();
+    });
   }
 
   // ===== 부위별 운동 골라 담기 (초보자용) =====
@@ -114,16 +164,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 900);
   });
 
-  // 체크/삭제 (이벤트 위임)
+  // 체크/삭제/세트편집 (이벤트 위임)
   itemsEl.addEventListener('click', (e) => {
     const toggleI = e.target.closest('[data-toggle]')?.dataset.toggle;
     const delI    = e.target.closest('[data-del]')?.dataset.del;
+    const editI   = e.target.closest('[data-edit]')?.dataset.edit;
     if (toggleI != null) {
       MyList.toggle(+toggleI);
       render();
-      maybeSuggestComplete();   // 다 체크했으면 "오늘 운동 완료" 제안
+      maybeSuggestComplete();
     }
     else if (delI != null) { MyList.remove(+delI); render(); }
+    else if (editI != null) { showSetEditor(+editI); }
   });
 
   // 운동 2개 이상이고 전부 ✓ 됐는데 아직 오늘 출석 안 했으면 → 완료 제안

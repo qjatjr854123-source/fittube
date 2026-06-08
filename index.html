@@ -48,7 +48,16 @@
       </button>
       <div class="logo">FitTube</div>
       <div class="subtitle">스마트 체형 분석 + 주간 운동/식단</div>
+      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="다크/라이트 모드">🌙</button>
     </header>
+
+    <!-- PWA 설치 유도 배너 -->
+    <div class="pwa-banner" id="pwaBanner" style="display:none;">
+      <span class="pwa-banner-icon">📲</span>
+      <span class="pwa-banner-text">홈화면에 추가하면 앱처럼 쓸 수 있어요!</span>
+      <button type="button" class="pwa-install-btn" id="pwaInstallBtn">설치</button>
+      <button type="button" class="pwa-banner-close" id="pwaBannerClose">×</button>
+    </div>
 
     <!-- 티커 -->
     <div class="ticker-wrap">
@@ -70,6 +79,19 @@
 
     <!-- 홈 대시보드 — 3개 핵심 카드 (오늘추천 + 출석 + 체중) -->
     <div class="home-dashboard">
+      <!-- 운동 타이머 -->
+      <div class="workout-timer-wrap" id="workoutTimerWrap">
+        <div class="wkt-display">
+          <span class="wkt-time" id="wktTime">00:00:00</span>
+          <span class="wkt-label" id="wktLabel">운동 준비 완료!</span>
+        </div>
+        <div class="wkt-btns">
+          <button type="button" class="wkt-btn start" id="wktStart">▶ 시작</button>
+          <button type="button" class="wkt-btn stop" id="wktStop" style="display:none;">⏸ 일시정지</button>
+          <button type="button" class="wkt-btn finish" id="wktFinish" style="display:none;">✓ 완료</button>
+        </div>
+      </div>
+
       <!-- 오늘 뭐 하지? — 직접 여기 배치 -->
       <div class="home-today-slot">
         <section class="today-pick" id="todayPick"></section>
@@ -92,6 +114,11 @@
               <span class="att-btn-text" id="attBtnText">오늘 운동 완료</span>
             </button>
             <div class="att-calendar" id="attCalendar"></div>
+            <div class="att-plan-banner" id="attPlanBanner" style="display:none;">
+              <span>운동 완료! 💪 플랜 볼까요?</span>
+              <a href="plan.html" class="att-plan-link">플랜 보기 →</a>
+              <button type="button" class="att-plan-close" id="attPlanClose">×</button>
+            </div>
           </section>
         </div>
         <div class="home-wt-slot">
@@ -100,16 +127,31 @@
               <span class="home-wt-label">WEIGHT</span>
               <span class="home-wt-latest" id="wtLatest">-- kg</span>
             </div>
+            <div class="wt-filter-tabs">
+              <button class="wt-filter-tab active" data-range="7">1주</button>
+              <button class="wt-filter-tab" data-range="30">1달</button>
+              <button class="wt-filter-tab" data-range="0">전체</button>
+            </div>
             <div class="wt-graph wt-graph-mobile" id="wtGraphMobile"></div>
             <div class="wt-input-row" style="margin-top:10px; margin-bottom:0;">
               <input type="number" id="wtInput" class="wt-input" placeholder="오늘 체중 (kg)" step="0.1" min="20" max="300" inputmode="decimal">
               <button type="button" class="wt-save-btn" id="wtSaveBtn">기록</button>
             </div>
             <div class="wt-empty" id="wtEmpty" style="display:none;">아직 기록이 없어요</div>
+            <div class="wt-history" id="wtHistory"></div>
+            <div class="wt-goal-row">
+              <span class="wt-goal-label">목표</span>
+              <input type="number" id="wtGoalInput" class="wt-goal-input" placeholder="목표 체중" step="0.1" min="20" max="300" inputmode="decimal">
+              <button type="button" class="wt-goal-btn" id="wtGoalSave">설정</button>
+            </div>
+            <div class="wt-goal-diff" id="wtGoalDiff"></div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- 운동 통계 -->
+    <section class="stats-section" id="statsSection"></section>
 
     <nav id="progressNav" class="progress-nav" style="margin-top:20px;"></nav>
 
@@ -131,7 +173,22 @@
         📸 사진을 업로드해주세요
       </div>
 
-      <form class="info-inputs" autocomplete="off" onsubmit="return false;">
+      <!-- 분석 시작 버튼 — 사진 바로 아래 -->
+      <button class="analyze-btn" id="analyzeBtn" style="margin-top:16px;">
+        분석 시작
+      </button>
+
+      <!-- 세부 정보 접기/펼치기 -->
+      <button type="button" id="detailToggleBtn" style="
+        width:100%; margin-top:12px; padding:10px;
+        background:transparent; border:1px solid rgba(255,255,255,0.2);
+        border-radius:10px; color:rgba(255,255,255,0.6);
+        font-size:13px; cursor:pointer; text-align:center;
+      ">
+        ⚙️ 세부 정보 입력하면 더 정확해요 ▾
+      </button>
+
+      <form class="info-inputs" id="detailForm" autocomplete="off" onsubmit="return false;" style="display:none; margin-top:8px;">
         <div class="input-row">
           <label>키 (cm)</label>
           <input type="number" id="heightInput" placeholder="175" value="175" min="100" max="250" autocomplete="off">
@@ -165,14 +222,25 @@
             체지방률 (%)
             <span class="optional-tag">선택</span>
           </label>
-          <input type="number" id="bodyFatInput" placeholder="모르면 비워두세요 (예: 18.5)" min="3" max="60" step="0.1" autocomplete="off">
+          <input type="number" id="bodyFatInput" placeholder="모르면 비워두세요 (예: 18.5)" min="3" max="50" step="0.1" autocomplete="off">
           <div class="bodyfat-help">몰라도 괜찮아요! 비워두면 키·체중으로 자동 계산해요</div>
         </div>
       </form>
 
-      <button class="analyze-btn" id="analyzeBtn">
-        분석 시작
-      </button>
+      <script>
+        (function() {
+          const btn = document.getElementById('detailToggleBtn');
+          const form = document.getElementById('detailForm');
+          if (!btn || !form) return;
+          btn.addEventListener('click', function() {
+            const isOpen = form.style.display !== 'none';
+            form.style.display = isOpen ? 'none' : 'block';
+            btn.textContent = isOpen
+              ? '⚙️ 세부 정보 입력하면 더 정확해요 ▾'
+              : '⚙️ 세부 정보 접기 ▴';
+          });
+        })();
+      </script>
     </section>
 
     <!-- 성취 배지 -->
@@ -388,6 +456,8 @@
   <script src="mylist.js"></script>
   <script src="today.js"></script>
   <script src="badges.js"></script>
+  <script src="stats.js"></script>
+  <script src="workout-timer.js"></script>
   <script src="sticky-cards.js"></script>
 
   <!-- 로그아웃 -->

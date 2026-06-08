@@ -13,6 +13,55 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   });
 }
 
+// ===== PWA 설치 유도 배너 =====
+let _pwaPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  _pwaPrompt = e;
+  // 이미 닫은 적 있으면 다시 안 보여줌
+  if (localStorage.getItem('fittube_pwa_dismissed')) return;
+  const banner = document.getElementById('pwaBanner');
+  if (banner) banner.style.display = 'flex';
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  const installBtn = document.getElementById('pwaInstallBtn');
+  const closeBtn   = document.getElementById('pwaBannerClose');
+  const banner     = document.getElementById('pwaBanner');
+
+  if (installBtn) {
+    installBtn.addEventListener('click', () => {
+      if (!_pwaPrompt) return;
+      _pwaPrompt.prompt();
+      _pwaPrompt.userChoice.then(() => {
+        _pwaPrompt = null;
+        if (banner) banner.style.display = 'none';
+      });
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      if (banner) banner.style.display = 'none';
+      localStorage.setItem('fittube_pwa_dismissed', '1');
+    });
+  }
+
+  // 다크/라이트 모드 토글
+  const themeBtn = document.getElementById('themeToggleBtn');
+  const savedTheme = localStorage.getItem('fittube_theme') || 'dark';
+  if (savedTheme === 'light') document.body.classList.add('light-mode');
+  if (themeBtn) themeBtn.textContent = savedTheme === 'light' ? '☀️' : '🌙';
+
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      const isLight = document.body.classList.toggle('light-mode');
+      localStorage.setItem('fittube_theme', isLight ? 'light' : 'dark');
+      themeBtn.textContent = isLight ? '☀️' : '🌙';
+    });
+  }
+});
+
 const STORAGE_KEYS = {
   USER:           'fittube_user',
   WEIGHTS:        'fittube_weights',           // 날짜별 체중 { 'YYYY-MM-DD': 70.5 }
@@ -27,6 +76,8 @@ const STORAGE_KEYS = {
   GOAL:           'fittube_goal',
   RECORDS:        'fittube_records',
   SELECTED_DAY:   'fittube_selected_day',
+  MEMOS:          'fittube_memos',             // 날짜별 운동 메모 { 'YYYY-MM-DD': '메모 내용' }
+  WEIGHT_GOAL:    'fittube_weight_goal',       // 목표 체중 (숫자)
 };
 
 // ===== 저장/로드 =====
@@ -328,6 +379,12 @@ const Weights = {
   recent(n) {
     const arr = this.sorted();
     return n ? arr.slice(-n) : arr;
+  },
+  // 특정 날짜 기록 삭제
+  remove(dateKey) {
+    const w = this.all();
+    delete w[dateKey];
+    Store.set(STORAGE_KEYS.WEIGHTS, w);
   }
 };
 
@@ -335,7 +392,18 @@ const Weights = {
 // 저장 형태: [{ name: '푸시업 30개', done: false }, ...]
 const MyList = {
   all() {
-    return Store.get(STORAGE_KEYS.MYLIST) || [];
+    const list = Store.get(STORAGE_KEYS.MYLIST) || [];
+    // 날짜가 바뀌면 done 체크만 자동 초기화 (운동 목록은 유지)
+    const lastReset = Store.get('fittube_mylist_reset_date');
+    const today = todayKey();
+    if (lastReset !== today && list.some(item => item.done)) {
+      const reset = list.map(item => ({ ...item, done: false }));
+      Store.set(STORAGE_KEYS.MYLIST, reset);
+      Store.set('fittube_mylist_reset_date', today);
+      return reset;
+    }
+    if (lastReset !== today) Store.set('fittube_mylist_reset_date', today);
+    return list;
   },
   add(name) {
     const list = this.all();
@@ -358,5 +426,31 @@ const MyList = {
     const list = this.all();
     list.splice(index, 1);
     Store.set(STORAGE_KEYS.MYLIST, list);
+  }
+};
+
+// ===== 운동 메모 =====
+// 저장 형태: { "2026-06-04": "오늘 PR 달성! 벤치 80kg", ... }
+const Memos = {
+  all() {
+    return Store.get(STORAGE_KEYS.MEMOS) || {};
+  },
+  get(dateKey) {
+    return this.all()[dateKey] || '';
+  },
+  set(dateKey, text) {
+    const memos = this.all();
+    if (text.trim()) {
+      memos[dateKey] = text.trim();
+    } else {
+      delete memos[dateKey];
+    }
+    Store.set(STORAGE_KEYS.MEMOS, memos);
+  },
+  today() {
+    return this.get(todayKey());
+  },
+  setToday(text) {
+    this.set(todayKey(), text);
   }
 };
