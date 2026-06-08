@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitTube — 주간 플랜 + 데일리</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff0033">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FitTube">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+  <script>
+    (function() {
+      try {
+        const raw = localStorage.getItem('fittube_login');
+        const login = raw ? JSON.parse(raw) : null;
+        if (!login || !login.id) {
+          window.location.replace('login.html');
+        }
+      } catch (e) {
+        window.location.replace('login.html');
+      }
+    })();
+  </script>
+  <div class="phone">
+    <header class="header">
+      <div class="logo">FitTube</div>
+      <div class="subtitle">이번 주 운동 + 식단</div>
+    </header>
+
+    <nav id="progressNav" class="progress-nav"></nav>
+
+    <!-- 주간 플랜 -->
+    <section class="step-section hud-section" id="step3">
+      <div class="hud-top">
+        <div class="hud-label">WEEK PLAN · 7DAYS</div>
+        <div class="hud-scan"><span class="hud-dot"></span> TRAINING</div>
+      </div>
+      <div class="hud-title">
+        이번 주<br><span class="hud-title-red">플랜</span>
+      </div>
+      <div class="week-grid" id="weekGrid"></div>
+    </section>
+
+    <!-- 데일리 상세 -->
+    <section class="step-section hud-section" id="step4" style="display:none; margin-top:12px;">
+      <div class="hud-top">
+        <div class="hud-label">DAILY · <span id="selectedDay">월요일</span></div>
+        <div class="hud-scan"><span class="hud-dot"></span> <span id="selectedDayPart">가슴</span></div>
+      </div>
+      <div class="hud-title" style="font-size:22px; margin-bottom:14px;">
+        오늘의 <span class="hud-title-red">루틴</span>
+      </div>
+
+      <div class="sub-label">운동할 부위</div>
+      <div class="muscle-map-wrap" id="muscleMapWrap"></div>
+
+      <div class="sub-label" style="margin-top:18px;">운동 자세 영상</div>
+      <div class="video-wrap" id="videoWrap"></div>
+
+      <!-- 휴식 타이머 -->
+      <div class="sub-label" style="margin-top:18px;">세트 휴식 타이머</div>
+      <div class="rest-timer" id="restTimer">
+        <div class="rt-display" id="rtDisplay">1:00</div>
+        <div class="rt-presets">
+          <button class="rt-preset" data-sec="30">30초</button>
+          <button class="rt-preset active" data-sec="60">1분</button>
+          <button class="rt-preset" data-sec="90">90초</button>
+          <button class="rt-preset" data-sec="120">2분</button>
+        </div>
+        <div class="rt-controls">
+          <button class="rt-btn rt-start" id="rtStart">시작</button>
+          <button class="rt-btn rt-reset" id="rtReset">초기화</button>
+        </div>
+      </div>
+
+      <div class="sub-label" style="margin-top:18px;">오늘의 식단 (<span id="goalLabel">유지</span>)</div>
+      <div class="diet-summary" id="dietSummary"></div>
+      <div class="meal-list" id="mealList"></div>
+    </section>
+
+    <!-- 페이지 이동 액션 -->
+    <div class="page-actions">
+      <button class="nav-btn nav-btn-prev" onclick="goTo('prediction.html')">← 예측</button>
+    </div>
+
+    <div class="restart-hint">
+      다시 측정하려면 <a href="index.html" class="restart-link">처음으로</a>
+    </div>
+
+    <div class="footer-hint">
+      · 스마트 분석 · 주간 플랜 · 영상 + 식단 ·
+      <br>
+      <a href="terms.html#이용약관" class="terms-link">이용약관</a> ·
+      <a href="terms.html#개인정보" class="terms-link">개인정보</a> ·
+      <a href="terms.html#면책" class="terms-link">면책</a>
+    </div>
+  </div>
+
+  <div class="bg-photo"></div>
+  <div class="bg-overlay"></div>
+  <div class="bg-deco bg-1"></div>
+  <div class="bg-deco bg-2"></div>
+  <div class="bg-deco bg-3"></div>
+  <div class="bg-grid"></div>
+
+  <script src="shared.js"></script>
+  <script src="exercise-db.js"></script>
+  <script src="script.js"></script>
+  <script src="plan.js"></script>
+  <script src="timer.js"></script>
+</body>
+</html>

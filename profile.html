@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitTube — 내 프로필</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff0033">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FitTube">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+  <script>
+    // 로그인 가드
+    (function() {
+      try {
+        const raw = localStorage.getItem('fittube_login');
+        const login = raw ? JSON.parse(raw) : null;
+        if (!login || !login.id) window.location.replace('login.html');
+      } catch (e) { window.location.replace('login.html'); }
+    })();
+  </script>
+
+  <div class="phone">
+    <header class="header">
+      <button type="button" class="logout-btn" id="logoutBtn" title="로그아웃">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        로그아웃
+      </button>
+      <div class="logo">FitTube</div>
+      <div class="subtitle">내 프로필</div>
+    </header>
+
+    <nav id="progressNav" class="progress-nav"></nav>
+
+    <!-- 프로필 본체 — JS가 채움 -->
+    <section id="profileBody"></section>
+
+    <div class="page-actions">
+      <button class="nav-btn nav-btn-prev" onclick="goTo('index.html')">← 홈으로</button>
+    </div>
+
+    <div class="footer-hint">
+      · 스마트 분석 · 주간 플랜 · 영상 + 식단 ·
+      <br>
+      <a href="terms.html#이용약관" class="terms-link">이용약관</a> ·
+      <a href="terms.html#개인정보" class="terms-link">개인정보</a> ·
+      <a href="terms.html#면책" class="terms-link">면책</a>
+    </div>
+  </div>
+
+  <div class="bg-photo"></div>
+  <div class="bg-overlay"></div>
+  <div class="bg-deco bg-1"></div>
+  <div class="bg-deco bg-2"></div>
+  <div class="bg-deco bg-3"></div>
+  <div class="bg-grid"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="shared.js"></script>
+  <script src="profile.js"></script>
+</body>
+</html>

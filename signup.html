@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitTube — 회원가입</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff0033">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FitTube">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="login.css">
+</head>
+<body class="login-body">
+  <!-- 배경 그라데이션 원 -->
+  <div class="login-bg-circle login-bg-circle-1"></div>
+  <div class="login-bg-circle login-bg-circle-2"></div>
+
+  <div class="login-phone">
+    <div class="login-inner">
+
+      <!-- 아이콘 + 로고 -->
+      <div class="login-icon">
+        <div class="login-icon-box">F</div>
+      </div>
+
+      <header class="login-header">
+        <div class="login-logo">회원가입</div>
+        <div class="login-tagline">
+          FitTube 시작을 위한 정보를 입력해주세요.<br>
+          모든 정보는 기기에만 저장됩니다.
+        </div>
+      </header>
+
+      <!-- 회원가입 카드 -->
+      <section class="login-card">
+        <form id="signupForm" class="login-form" autocomplete="off" onsubmit="return false;">
+          <div class="login-field">
+            <label for="signupId">아이디 <span class="login-required">필수</span></label>
+            <input type="text" id="signupId" placeholder="3자 이상 영문/숫자" autocomplete="off">
+          </div>
+
+          <div class="login-field">
+            <label for="signupEmail">이메일 <span class="login-optional">선택</span></label>
+            <input type="email" id="signupEmail" placeholder="example@email.com" autocomplete="off">
+          </div>
+
+          <div class="login-field">
+            <label for="signupPw">비밀번호 <span class="login-required">필수</span></label>
+            <input type="password" id="signupPw" placeholder="4자 이상" autocomplete="off">
+          </div>
+
+          <div class="login-field">
+            <label for="signupPwConfirm">비밀번호 확인 <span class="login-required">필수</span></label>
+            <input type="password" id="signupPwConfirm" placeholder="다시 한 번 입력" autocomplete="off">
+          </div>
+
+          <div class="login-field login-checkbox-field">
+            <label class="login-checkbox-label">
+              <input type="checkbox" id="signupAgree">
+              <span class="login-checkbox-text">
+                <a href="terms.html" class="login-terms-link">이용약관</a>·
+                <a href="terms.html" class="login-terms-link">개인정보 처리방침</a>에 동의합니다
+              </span>
+            </label>
+          </div>
+
+          <div class="login-error" id="signupError" style="display:none;"></div>
+
+          <button type="button" class="login-btn" id="signupBtn">가입하기</button>
+
+          <div class="login-sub-actions">
+            <span class="login-link-text">이미 계정이 있나요?</span>
+            <a href="login.html" class="login-link login-link-strong">로그인</a>
+          </div>
+        </form>
+      </section>
+
+      <!-- 개인정보 안내 -->
+      <div class="login-privacy">
+        <div class="login-privacy-title">개인정보 안내</div>
+        <div class="login-privacy-row">
+          <span class="lp-check">✅</span>
+          <span class="lp-text">기기에만 저장</span>
+          <span class="lp-sep">·</span>
+          <span class="lp-cross">❌</span>
+          <span class="lp-text">서버 전송 없음</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="shared.js"></script>
+  <script src="signup.js"></script>
+</body>
+</html>

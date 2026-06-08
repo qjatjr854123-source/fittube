@@ -1,0 +1,19 @@
+{
+  "name": "FitTube — 헬스 초보 가이드",
+  "short_name": "FitTube",
+  "description": "헬스장 처음인 사람을 위한 앱 — 오늘 뭘 할지 골라주고, 자세 영상으로 알려주고, 꾸준함을 만들어줘요.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0d10",
+  "theme_color": "#ff0033",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

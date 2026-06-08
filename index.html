@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitTube — AI 체형 분석 + 주간 플랜</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff0033">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FitTube">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+  <script>
+    // 로그인 가드 — 비로그인 시 login.html 로 즉시 이동
+    (function() {
+      try {
+        const raw = localStorage.getItem('fittube_login');
+        const login = raw ? JSON.parse(raw) : null;
+        if (!login || !login.id) {
+          window.location.replace('login.html');
+        }
+      } catch (e) {
+        window.location.replace('login.html');
+      }
+    })();
+  </script>
+  <div class="phone">
+    <header class="header">
+      <button type="button" class="profile-btn" onclick="goTo('profile.html')" title="내 프로필">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+        </svg>
+        내 프로필
+      </button>
+      <button type="button" class="logout-btn" id="logoutBtn" title="로그아웃">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        로그아웃
+      </button>
+      <div class="logo">FitTube</div>
+      <div class="subtitle">스마트 체형 분석 + 주간 운동/식단</div>
+    </header>
+
+    <!-- 티커 -->
+    <div class="ticker-wrap">
+      <div class="ticker-track">
+        <span>♦ BMI · TDEE 자동 계산</span>
+        <span>♦ 7일 챌린지</span>
+        <span>♦ 체중 트래킹</span>
+        <span>♦ 주간 플랜</span>
+        <span>♦ 영상 + 식단</span>
+        <span>♦ 운동 streak</span>
+        <span>♦ BMI · TDEE 자동 계산</span>
+        <span>♦ 7일 챌린지</span>
+        <span>♦ 체중 트래킹</span>
+        <span>♦ 주간 플랜</span>
+        <span>♦ 영상 + 식단</span>
+        <span>♦ 운동 streak</span>
+      </div>
+    </div>
+
+    <!-- 홈 대시보드 — 3개 핵심 카드 (오늘추천 + 출석 + 체중) -->
+    <div class="home-dashboard">
+      <!-- 오늘 뭐 하지? — 직접 여기 배치 -->
+      <div class="home-today-slot">
+        <section class="today-pick" id="todayPick"></section>
+      </div>
+
+      <!-- 출석 + 체중 나란히 -->
+      <div class="home-row">
+        <div class="home-att-slot">
+          <section class="attendance" id="attendance">
+            <div class="att-top">
+              <div class="att-streak">
+                <span class="att-fire">🔥</span>
+                <span class="att-streak-num" id="attStreakNum">0</span>
+                <span class="att-streak-label">일 연속</span>
+              </div>
+              <div class="att-month" id="attMonth">이번 달 0일</div>
+            </div>
+            <button type="button" class="att-btn" id="attBtn">
+              <span class="att-btn-icon" id="attBtnIcon">💪</span>
+              <span class="att-btn-text" id="attBtnText">오늘 운동 완료</span>
+            </button>
+            <div class="att-calendar" id="attCalendar"></div>
+          </section>
+        </div>
+        <div class="home-wt-slot">
+          <div class="home-wt-card">
+            <div class="home-wt-head">
+              <span class="home-wt-label">WEIGHT</span>
+              <span class="home-wt-latest" id="wtLatest">-- kg</span>
+            </div>
+            <div class="wt-graph wt-graph-mobile" id="wtGraphMobile"></div>
+            <div class="wt-input-row" style="margin-top:10px; margin-bottom:0;">
+              <input type="number" id="wtInput" class="wt-input" placeholder="오늘 체중 (kg)" step="0.1" min="20" max="300" inputmode="decimal">
+              <button type="button" class="wt-save-btn" id="wtSaveBtn">기록</button>
+            </div>
+            <div class="wt-empty" id="wtEmpty" style="display:none;">아직 기록이 없어요</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav id="progressNav" class="progress-nav" style="margin-top:20px;"></nav>
+
+    <!-- STEP 1: 사진 + 정보 입력 -->
+    <section class="step-section" id="step1">
+      <div class="step-badge">STEP 01</div>
+      <div class="section-title">내 체형 분석</div>
+
+      <div class="upload-box" id="uploadBox">
+        <input type="file" id="fileInput" accept="image/*" style="display:none">
+        <div class="upload-inner" id="uploadInner">
+          <div class="upload-icon">📷</div>
+          <div class="upload-text">사진 업로드</div>
+          <div class="upload-sub">전신 사진 (참고용)</div>
+        </div>
+      </div>
+      <!-- 사진 미업로드 경고 -->
+      <div id="photoWarning" style="display:none; color:#ff0033; font-size:12px; margin-top:6px; text-align:center;">
+        📸 사진을 업로드해주세요
+      </div>
+
+      <form class="info-inputs" autocomplete="off" onsubmit="return false;">
+        <div class="input-row">
+          <label>키 (cm)</label>
+          <input type="number" id="heightInput" placeholder="175" value="175" min="100" max="250" autocomplete="off">
+        </div>
+        <div class="input-row">
+          <label>체중 (kg)</label>
+          <input type="number" id="weightInput" placeholder="70" value="70" min="20" max="300" autocomplete="off">
+        </div>
+        <div class="input-row">
+          <label>나이</label>
+          <input type="number" id="ageInput" placeholder="25" value="25" min="10" max="100" autocomplete="off">
+        </div>
+        <div class="input-row">
+          <label>성별</label>
+          <div class="gender-row">
+            <button type="button" class="gender-btn active" data-gender="남">남</button>
+            <button type="button" class="gender-btn" data-gender="여">여</button>
+          </div>
+        </div>
+        <div class="input-row">
+          <label>활동 수준</label>
+          <select id="activityInput" class="activity-select" autocomplete="off">
+            <option value="1.2">거의 안 움직임</option>
+            <option value="1.375">가벼운 운동 (주 1~3회)</option>
+            <option value="1.55" selected>보통 운동 (주 3~5회)</option>
+            <option value="1.725">활동적 (주 6~7회)</option>
+          </select>
+        </div>
+        <div class="input-row">
+          <label>
+            체지방률 (%)
+            <span class="optional-tag">선택</span>
+          </label>
+          <input type="number" id="bodyFatInput" placeholder="모르면 비워두세요 (예: 18.5)" min="3" max="60" step="0.1" autocomplete="off">
+          <div class="bodyfat-help">몰라도 괜찮아요! 비워두면 키·체중으로 자동 계산해요</div>
+        </div>
+      </form>
+
+      <button class="analyze-btn" id="analyzeBtn">
+        분석 시작
+      </button>
+    </section>
+
+    <!-- 성취 배지 -->
+    <section class="badges" id="badges"></section>
+
+    <!-- 폰에서 "나만의 운동" 리스트가 들어올 자리 (데스크탑은 오른쪽 카드) -->
+    <div id="mlMobileSlot"></div>
+
+    <!-- 체중 섹션 — 데스크탑 오른쪽 카드용 (폰은 home-dashboard에서 처리) -->
+    <section class="wt-section" id="wtSection" style="display:none;"></section>
+
+    <!-- STEP 2: 분석 결과 — B 스타일 (BMI 도넛 + 수치) -->
+    <section class="step-section hud-section" id="step2" style="display:none;">
+
+      <!-- 상단 레이블 -->
+      <div class="hud-top">
+        <div class="hud-label">ANALYZING · <span id="hudHeight">175</span>CM / <span id="hudWeight">70</span>KG</div>
+        <div class="hud-scan"><span class="hud-dot"></span> BODY SCAN</div>
+      </div>
+
+      <!-- 타이틀 -->
+      <div class="hud-title">
+        내 체형<br><span class="hud-title-red">데이터</span>
+      </div>
+
+      <!-- BMI 도넛 게이지 -->
+      <div class="hud-donut-wrap">
+        <svg class="hud-donut" viewBox="0 0 120 120">
+          <circle class="hud-donut-bg" cx="60" cy="60" r="50"/>
+          <circle class="hud-donut-fill" id="bmiDonutFill" cx="60" cy="60" r="50"
+            stroke-dasharray="0 314"
+            stroke-dashoffset="78"/>
+        </svg>
+        <div class="hud-donut-inner">
+          <div class="hud-donut-label">BMI INDEX</div>
+          <div class="hud-donut-val" id="bmiValue">--</div>
+          <div class="hud-donut-status" id="bmiStatus">분석 중</div>
+        </div>
+      </div>
+
+      <!-- 수치 3개 -->
+      <div class="hud-metrics">
+        <div class="hud-metric-row">
+          <div class="hud-metric-left">
+            <span class="hud-metric-key">BMR</span>
+            <span class="hud-metric-dot">·</span>
+            <span class="hud-metric-desc">기초대사량</span>
+          </div>
+          <div class="hud-metric-right">
+            <span class="hud-metric-val" id="bmrValue">--</span>
+            <span class="hud-metric-unit">kcal</span>
+          </div>
+        </div>
+        <div class="hud-metric-row">
+          <div class="hud-metric-left">
+            <span class="hud-metric-key">TDEE</span>
+            <span class="hud-metric-dot">·</span>
+            <span class="hud-metric-desc">권장섭취</span>
+          </div>
+          <div class="hud-metric-right">
+            <span class="hud-metric-val" id="tdeeValue">--</span>
+            <span class="hud-metric-unit">kcal</span>
+          </div>
+        </div>
+        <div class="hud-metric-row">
+          <div class="hud-metric-left">
+            <span class="hud-metric-key">BODY FAT</span>
+            <span class="hud-metric-dot">·</span>
+            <span class="hud-metric-desc">체지방</span>
+          </div>
+          <div class="hud-metric-right">
+            <span class="hud-metric-val" id="bfValue">--</span>
+            <span class="hud-metric-unit">%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 목표 선택 -->
+      <div class="hud-goal">
+        <div class="hud-goal-label">목표 설정</div>
+        <div class="gr-cards">
+          <div class="gr-card" data-goal="벌크업">
+            <div class="gr-emoji">💪</div>
+            <div class="gr-name">근육 키우기</div>
+            <div class="gr-sub">벌크업</div>
+          </div>
+          <div class="gr-card active" data-goal="유지">
+            <div class="gr-emoji">⚖️</div>
+            <div class="gr-name">건강 유지</div>
+            <div class="gr-sub">현재 몸 유지</div>
+          </div>
+          <div class="gr-card" data-goal="다이어트">
+            <div class="gr-emoji">🔥</div>
+            <div class="gr-name">살 빼기</div>
+            <div class="gr-sub">체지방 감량</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 페이지 이동 액션 — 항상 표시, 클릭 시 검증 -->
+    <div class="page-actions" id="pageActions">
+      <button class="nav-btn nav-btn-next" id="goPredictionBtn">
+        예측 페이지 →
+      </button>
+    </div>
+
+    <div class="footer-hint">
+      · 스마트 분석 · 주간 플랜 · 영상 + 식단 ·
+      <br>
+      <a href="terms.html#이용약관" class="terms-link">이용약관</a> ·
+      <a href="terms.html#개인정보" class="terms-link">개인정보</a> ·
+      <a href="terms.html#면책" class="terms-link">면책</a>
+    </div>
+  </div>
+
+  <!-- 데스크탑 왼쪽 컬럼 -->
+  <div class="att-left-col">
+    <div class="att-float" id="attFloat">
+      <div class="att-float-head">
+        <span class="att-float-fire">🔥</span>
+        <span class="att-float-label">WORKOUT STREAK</span>
+      </div>
+      <div class="att-float-num"><span id="attFloatStreak">0</span><span class="att-float-unit">일 연속</span></div>
+      <div class="att-float-sub" id="attFloatMonth">이번 달 0일 운동</div>
+    </div>
+
+    <!-- 캘린더 -->
+    <div class="side-cal-card">
+      <div class="side-cal-head">
+        <span class="side-cal-label" id="sideCalMonth">6월</span>
+        <div class="side-cal-legend">
+          <span class="side-cal-dot"></span>운동 완료
+        </div>
+      </div>
+      <div class="att-calendar" id="attCalendarSide"></div>
+    </div>
+
+    <!-- 앱 소개 텍스트 -->
+    <div class="side-app-info">
+      <div class="sai-num">01</div><div class="sai-text">체형 분석</div>
+      <div class="sai-num">02</div><div class="sai-text">맞춤 추천 목표</div>
+      <div class="sai-num">03</div><div class="sai-text">주간 플랜</div>
+      <div class="sai-num">04</div><div class="sai-text">영상 + 식단</div>
+    </div>
+  </div>
+
+  <!-- 데스크탑 전용 — 오른쪽 컬럼 (체중 + 운동리스트 한 덩어리로 묶음) -->
+  <div class="wt-right-col">
+    <div class="wt-float" id="wtFloat">
+      <div class="wt-float-head">
+        <span class="wt-float-label">📈 WEIGHT</span>
+        <span class="wt-float-latest" id="wtFloatLatest">-- kg</span>
+      </div>
+      <div class="wt-graph" id="wtGraphDesktop"></div>
+      <div class="wt-float-foot" id="wtFloatFoot">체중을 기록해보세요</div>
+    </div>
+
+    <!-- 체중 카드 아래 "나만의 운동" -->
+    <div class="ml-float" id="mlFloat"></div>
+
+    <!-- 동기부여 카드 -->
+    <div class="side-motivation">
+      <div class="sm-quote">"NO EXCUSES"</div>
+      <div class="sm-sub">오늘 운동이 내일을 만든다</div>
+      <div class="sm-tags">
+        <span>#헬스초보</span>
+        <span>#꾸준함</span>
+        <span>#FitTube</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-photo"></div>
+  <div class="bg-overlay"></div>
+  <div class="bg-deco bg-1"></div>
+  <div class="bg-deco bg-2"></div>
+  <div class="bg-deco bg-3"></div>
+  <div class="bg-grid"></div>
+
+  <div class="side-info left">
+    <div class="info-title">FITTUBE</div>
+    <div class="info-line"></div>
+    <div class="info-item"><div class="info-num">01</div><div class="info-text">체형 분석</div></div>
+    <div class="info-item"><div class="info-num">02</div><div class="info-text">맞춤 추천 목표</div></div>
+    <div class="info-item"><div class="info-num">03</div><div class="info-text">주간 플랜</div></div>
+    <div class="info-item"><div class="info-num">04</div><div class="info-text">영상 + 식단</div></div>
+  </div>
+
+  <div class="side-info right">
+    <div class="badge">SMART FITNESS</div>
+    <div class="big-text">YOUR<br>WEEK</div>
+    <div class="small-text">사진 한 장으로<br>일주일 운동과<br>식단을 설계</div>
+    <div class="tag-row">
+      <span class="tag">#AI</span>
+      <span class="tag">#FITNESS</span>
+      <span class="tag">#DIET</span>
+    </div>
+  </div>
+
+  <!-- Firebase (로그아웃 시 구글 세션도 해제하기 위해 로드) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script src="shared.js"></script>
+  <script src="script.js"></script>
+  <script src="analysis.js"></script>
+  <script src="attendance.js"></script>
+  <script src="weight.js"></script>
+  <script src="exercise-db.js"></script>
+  <script src="mylist.js"></script>
+  <script src="today.js"></script>
+  <script src="badges.js"></script>
+  <script src="sticky-cards.js"></script>
+
+  <!-- 로그아웃 -->
+  <script>
+    (function() {
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (!logoutBtn) return;
+
+      logoutBtn.addEventListener('click', function() {
+        if (!confirm('로그아웃 할까요?')) return;
+
+        // 1) 우리 앱 로그인 정보 삭제
+        localStorage.removeItem('fittube_login');
+
+        // 2) 구글로 로그인했던 경우 Firebase 세션도 해제 (있을 때만)
+        var done = function() { window.location.href = 'login.html'; };
+        try {
+          if (typeof firebaseAuth !== 'undefined') {
+            firebaseAuth.signOut().then(done).catch(done);
+          } else {
+            done();
+          }
+        } catch (e) {
+          done();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

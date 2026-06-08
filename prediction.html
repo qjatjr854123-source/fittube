@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitTube — 예측 (Before / After)</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff0033">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FitTube">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+  <script>
+    (function() {
+      try {
+        const raw = localStorage.getItem('fittube_login');
+        const login = raw ? JSON.parse(raw) : null;
+        if (!login || !login.id) {
+          window.location.replace('login.html');
+        }
+      } catch (e) {
+        window.location.replace('login.html');
+      }
+    })();
+  </script>
+  <div class="phone">
+    <header class="header">
+      <div class="logo">FitTube</div>
+      <div class="subtitle" id="resultSubtitle">예상 결과</div>
+    </header>
+
+    <nav id="progressNav" class="progress-nav"></nav>
+
+    <section class="step-section hud-section" id="stepResult">
+
+      <!-- HUD 상단 -->
+      <div class="hud-top">
+        <div class="hud-label">PREDICTION · <span id="resultGoal">유지</span></div>
+        <div class="hud-scan"><span class="hud-dot"></span> BODY SCAN</div>
+      </div>
+
+      <!-- 타이틀 -->
+      <div class="hud-title">
+        예상<br><span class="hud-title-red">결과</span>
+      </div>
+
+      <!-- Before / After -->
+      <div class="ba-wrap">
+        <div class="ba-box">
+          <div class="ba-label">BEFORE</div>
+          <div class="ba-img-wrap" id="beforeImg">
+            <div class="ba-placeholder">현재 사진</div>
+          </div>
+        </div>
+
+        <div class="ba-arrow">
+          <div class="arrow-text" id="arrowText">예측</div>
+          <div class="arrow-icon">→</div>
+        </div>
+
+        <div class="ba-box">
+          <div class="ba-label">AFTER</div>
+          <div class="ba-img-wrap" id="afterImg">
+            <div class="ba-loading">
+              <div class="ba-spinner-new"></div>
+              <div class="ba-loading-text">결과 계산 중<span class="ba-dots"><i>.</i><i>.</i><i>.</i></span></div>
+              <div class="ba-loading-sub">키·체중·체지방 기반 추정</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 결과 메시지 -->
+      <div class="result-msg" id="resultMsg">예상 결과를 계산하는 중…</div>
+
+      <!-- 체형별 코칭 -->
+      <div class="coach-box" id="coachBox" style="display:none;">
+        <div class="coach-icon" id="coachIcon">🎯</div>
+        <div class="coach-text">
+          <strong id="coachTitle"></strong>
+          <p id="coachBody"></p>
+        </div>
+      </div>
+
+      <!-- 체지방 미입력 경고 -->
+      <div class="accuracy-warning" id="accuracyWarning" style="display:none;">
+        <span class="aw-icon">⚠</span>
+        <div class="aw-text">
+          <strong>체지방률 미입력</strong>
+          <p>키·체중·나이 기반 추정치예요. 정확한 결과를 원하면 인바디 측정 후 체지방률을 입력해주세요.</p>
+        </div>
+      </div>
+
+      <!-- 변화 수치 — HUD 스타일 -->
+      <div class="hud-metrics" id="changeBars"></div>
+
+    </section>
+
+    <div class="page-actions">
+      <button class="nav-btn nav-btn-prev" onclick="goTo('index.html')">← 분석</button>
+      <button class="nav-btn nav-btn-next" onclick="goTo('plan.html')">플랜 페이지 →</button>
+    </div>
+
+    <div class="footer-hint">
+      · 스마트 분석 · 주간 플랜 · 영상 + 식단 ·
+      <br>
+      <a href="terms.html#이용약관" class="terms-link">이용약관</a> ·
+      <a href="terms.html#개인정보" class="terms-link">개인정보</a> ·
+      <a href="terms.html#면책" class="terms-link">면책</a>
+    </div>
+  </div>
+
+  <div class="bg-photo"></div>
+  <div class="bg-overlay"></div>
+  <div class="bg-deco bg-1"></div>
+  <div class="bg-deco bg-2"></div>
+  <div class="bg-deco bg-3"></div>
+  <div class="bg-grid"></div>
+
+  <!-- 양옆 휑함 메우기 — 흐린 배경 타이포 (집중 안 뺏는 장식) -->
+  <div class="bg-text-fit tl">YOUR<br>RESULT</div>
+  <div class="bg-text-fit br">KEEP<br>GOING</div>
+
+  <script src="shared.js"></script>
+  <script src="script.js"></script>
+  <script src="prediction.js"></script>
+</body>
+</html>
