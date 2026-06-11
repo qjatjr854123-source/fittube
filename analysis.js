@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function saveAnalysisToStorage() {
   const height    = parseFloat(document.getElementById('heightInput').value) || 175;
-  const weight    = parseFloat(document.getElementById('weightInput').value) || 70;
+  const weight    = parseFloat(document.getElementById('weightInput').value);
   const age       = parseFloat(document.getElementById('ageInput')?.value) || 25;
   const activity  = parseFloat(document.getElementById('activityInput')?.value) || 1.55;
   const genderBtn = document.querySelector('.gender-btn.active');
