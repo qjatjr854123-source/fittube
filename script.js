@@ -439,7 +439,10 @@ function renderMuscleMap(part) {
 function renderDiet() {
   const config     = dietConfig[currentGoal];
   const storedUser = (typeof Store !== 'undefined') ? Store.get(STORAGE_KEYS.USER) : null;
-  const w          = (storedUser && storedUser.weight) ? parseFloat(storedUser.weight) : userInfo.weight;
+  const latestWeight = (typeof Weights !== 'undefined') ? Weights.sorted().slice(-1)[0]?.kg : null;
+  const w          = (storedUser && storedUser.weight) ? parseFloat(storedUser.weight)
+                   : latestWeight ? latestWeight
+                   : userInfo.weight || 70;
   const totalKcal  = Math.round(w * config.kcalPerKg);
   const totalP     = Math.round(w * config.proteinPerKg);
   const totalC     = Math.round((totalKcal * config.carbRatio) / 4);

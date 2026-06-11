@@ -191,6 +191,9 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     Weights.setToday(kg);
+    // 체중 위젯 기록 → USER 스토리지에도 반영 (식단 계산에 사용)
+    const prevUser = Store.get(STORAGE_KEYS.USER) || {};
+    Store.set(STORAGE_KEYS.USER, { ...prevUser, weight: kg });
     render();
     if (typeof window.refreshBadges === 'function') window.refreshBadges();
 
