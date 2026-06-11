@@ -4416,20 +4416,19 @@ body {
   gap: 8px;
 }
 .shop-btn {
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-decoration: none;
-  color: #fff !important;
-  background: #ff0033 !important;
-  padding: 4px 10px;
-  border-radius: 12px;
-  white-space: nowrap;
-  line-height: 1.4;
-  transition: opacity 0.2s;
+  color: #ff0033;
+  background: transparent;
+  padding: 2px;
+  border-radius: 4px;
+  transition: transform 0.15s, color 0.15s;
 }
 .shop-btn:hover {
-  opacity: 0.8;
+  color: #cc0022;
+  transform: scale(1.2);
 }
 
 /* 모바일 */
