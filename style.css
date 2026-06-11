@@ -4416,14 +4416,16 @@ body {
   gap: 8px;
 }
 .shop-btn {
-  font-size: 10px;
-  font-weight: 700;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
   text-decoration: none;
-  color: #fff;
-  background: #ff0033;
-  padding: 2px 7px;
-  border-radius: 10px;
+  color: #fff !important;
+  background: #ff0033 !important;
+  padding: 4px 10px;
+  border-radius: 12px;
   white-space: nowrap;
+  line-height: 1.4;
   transition: opacity 0.2s;
 }
 .shop-btn:hover {
