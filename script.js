@@ -460,6 +460,7 @@ function renderDiet() {
 
   const meals = mealTemplates[currentGoal];
   const scale = w / 70;
+  const allFoods = meals.flatMap(meal => meal.items.map(i => i.food));
   document.getElementById('mealList').innerHTML = meals.map(meal => `
     <div class="meal-card">
       <div class="meal-header">
@@ -475,7 +476,8 @@ function renderDiet() {
           </div>`;
         }).join('')}
       </div>
-      <a href="https://www.coupang.com/np/search?q=${encodeURIComponent(meal.items.map(i=>i.food).join('+'))}" target="_blank" class="meal-shop-link">쿠팡에서 재료 구매하기 →</a>
     </div>
-  `).join('');
+  `).join('') + `
+  <a href="https://www.coupang.com/np/search?q=${encodeURIComponent(allFoods[0])}" target="_blank" class="meal-coupang-btn">🛍 오늘 식단 재료 쿠팡에서 구매하기</a>
+  `;
 }
