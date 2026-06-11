@@ -164,9 +164,8 @@ function saveAnalysisToStorage() {
     bodyFat: (bodyFatVal && bodyFatVal >= 3 && bodyFatVal <= 60) ? bodyFatVal : null
   });
 
-  // STEP01 체중 → 체중 기록(그래프)에 오늘 날짜로 자동 저장
-  // (사용자가 체중 변화 섹션에 따로 입력하지 않아도 자동 기록됨)
-  if (typeof Weights !== 'undefined' && weight >= 20 && weight <= 300) {
+  // 오늘 체중 기록이 없을 때만 분석 입력값으로 저장 (중복 저장 방지)
+  if (typeof Weights !== 'undefined' && weight >= 20 && weight <= 300 && Weights.getToday() === null) {
     Weights.setToday(weight);
     if (typeof window.refreshWeightGraph === 'function') window.refreshWeightGraph();
   }
@@ -222,8 +221,8 @@ function checkReadyToProceed() {
       Store.set(STORAGE_KEYS.USER, { height, weight, age, activity, gender,
         bodyFat: (bodyFatVal >= 3 && bodyFatVal <= 60) ? bodyFatVal : null });
 
-      // STEP01 체중 → 체중 기록(그래프)에 자동 저장
-      if (typeof Weights !== 'undefined' && weight >= 20 && weight <= 300) {
+      // 오늘 체중 기록이 없을 때만 분석 입력값으로 저장 (중복 저장 방지)
+      if (typeof Weights !== 'undefined' && weight >= 20 && weight <= 300 && Weights.getToday() === null) {
         Weights.setToday(weight);
         if (typeof window.refreshWeightGraph === 'function') window.refreshWeightGraph();
       }
