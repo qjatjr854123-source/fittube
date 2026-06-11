@@ -108,17 +108,26 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const filter = filterMap[goal] || 'none';
 
-    afterImg.innerHTML = `
-      <div style="position:relative;width:100%;height:100%;">
-        <img src="${photo}" class="ba-img ba-img-after" alt="after"
-             style="filter:${filter}; transform:scale(1.04);">
-        <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,0,51,0.15),transparent);border-radius:12px;pointer-events:none;"></div>
-        <div class="ba-after-badge">+${config.weeks}주</div>
-        <div style="position:absolute;bottom:6px;left:6px;right:6px;font-size:8px;color:rgba(255,255,255,0.8);background:rgba(0,0,0,0.55);padding:3px 6px;border-radius:5px;text-align:center;backdrop-filter:blur(4px);">
-          ※ 실제 미래 사진 아님 · 이미지 효과
+    if (photo) {
+      afterImg.innerHTML = `
+        <div style="position:relative;width:100%;height:100%;">
+          <img src="${photo}" class="ba-img ba-img-after" alt="after"
+               style="filter:${filter}; transform:scale(1.04);">
+          <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,0,51,0.15),transparent);border-radius:12px;pointer-events:none;"></div>
+          <div class="ba-after-badge">+${config.weeks}주</div>
+          <div style="position:absolute;bottom:6px;left:6px;right:6px;font-size:8px;color:rgba(255,255,255,0.8);background:rgba(0,0,0,0.55);padding:3px 6px;border-radius:5px;text-align:center;backdrop-filter:blur(4px);">
+            ※ 실제 미래 사진 아님 · 이미지 효과
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    } else {
+      afterImg.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;">
+          ${silhouettes[goal] || silhouettes['유지']}
+          <div class="ba-after-badge">+${config.weeks}주</div>
+        </div>
+      `;
+    }
   }, 3000);});
 
 function computeConfig(goal, user, metrics) {
