@@ -478,6 +478,6 @@ function renderDiet() {
       </div>
     </div>
   `).join('') + `
-  <a href="https://www.coupang.com/np/search?q=${encodeURIComponent(allFoods[0])}" target="_blank" class="meal-coupang-btn">🛍 오늘 식단 재료 쿠팡에서 구매하기</a>
+  <a href="https://www.coupang.com/np/search?q=${encodeURIComponent(allFoods[0])}" target="_blank" class="meal-coupang-link">쿠팡에서 구매하기</a>
   `;
 }

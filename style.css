@@ -4415,20 +4415,16 @@ body {
   align-items: center;
   gap: 8px;
 }
-.meal-coupang-btn {
+.meal-coupang-link {
   display: block;
-  margin: 16px 0 8px;
-  padding: 14px;
-  background: #ff0033;
-  color: #fff;
+  margin: 12px 0 4px;
+  font-size: 13px;
+  color: #ff0033;
+  text-decoration: underline;
   text-align: center;
-  font-size: 14px;
-  font-weight: 700;
-  text-decoration: none;
-  border-radius: 12px;
 }
-.meal-coupang-btn:hover {
-  opacity: 0.85;
+.meal-coupang-link:hover {
+  opacity: 0.7;
 }
 .shop-btn {
   display: inline-flex;
