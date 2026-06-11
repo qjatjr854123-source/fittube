@@ -4415,6 +4415,19 @@ body {
   align-items: center;
   gap: 8px;
 }
+.meal-shop-link {
+  display: block;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+  font-size: 12px;
+  color: #ff0033;
+  text-decoration: none;
+  text-align: right;
+}
+.meal-shop-link:hover {
+  text-decoration: underline;
+}
 .shop-btn {
   display: inline-flex;
   align-items: center;

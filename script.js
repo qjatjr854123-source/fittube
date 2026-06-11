@@ -471,13 +471,11 @@ function renderDiet() {
           const amt = Math.round(i.basePer70 * scale);
           return `<div class="meal-item">
             <div class="mi-food">${i.food}</div>
-            <div class="mi-right">
-              <div class="mi-amount">${amt}${i.unit.startsWith('g') ? '' : ' '}${i.unit}</div>
-              <a href="https://www.coupang.com/np/search?q=${encodeURIComponent(i.food)}" target="_blank" class="shop-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></a>
-            </div>
+            <div class="mi-amount">${amt}${i.unit.startsWith('g') ? '' : ' '}${i.unit}</div>
           </div>`;
         }).join('')}
       </div>
+      <a href="https://www.coupang.com/np/search?q=${encodeURIComponent(meal.items.map(i=>i.food).join('+'))}" target="_blank" class="meal-shop-link">쿠팡에서 재료 구매하기 →</a>
     </div>
   `).join('');
 }
