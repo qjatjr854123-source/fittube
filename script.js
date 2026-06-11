@@ -470,7 +470,7 @@ function renderDiet() {
             <div class="mi-food">${i.food}</div>
             <div class="mi-right">
               <div class="mi-amount">${amt}${i.unit.startsWith('g') ? '' : ' '}${i.unit}</div>
-              <a href="https://www.coupang.com/np/search?q=${encodeURIComponent(i.food)}" target="_blank" class="shop-btn">🛒</a>
+              <a href="https://www.coupang.com/np/search?q=${encodeURIComponent(i.food)}" target="_blank" class="shop-btn">구매</a>
             </div>
           </div>`;
         }).join('')}
