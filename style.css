@@ -4413,5 +4413,21 @@ body {
 /* 모바일 */
 @media (max-width: 600px) {
   .muscle-map-wrap { padding: 16px 10px 12px; }
-  .muscle-image-wrap { max-width: 100%; }
+  .muscle-image-wrap { max-width: 100%; }.mi-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shop-btn {
+  font-size: 16px;
+  text-decoration: none;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.shop-btn:hover {
+  opacity: 1;
+}
+
 }
