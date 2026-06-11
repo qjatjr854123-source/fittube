@@ -7,7 +7,7 @@ const partVideos = {
   '팔': 'kwG2ipFRgfo',
   '복근': 'ASdvN_XEl_c',
   '유산소': 'Imdmug2sH9w',
-  '휴식': 'g_tea8ZNk5A'  // 회복 스트레칭 영상 추가
+  '휴식': 'g_tea8ZNk5A'
 };
 
 const partEmojis = {
@@ -54,7 +54,7 @@ const mealTemplates = {
       { food: '아보카도',    basePer70: 80,  unit: 'g' }
     ]},
     { time: '16:00', name: '운동 전 간식', items: [
-      { food: '고구마',         basePer70: 200, unit: 'g' },
+      { food: '고구마',        basePer70: 200, unit: 'g' },
       { food: '프로틴 셰이크', basePer70: 30,  unit: 'g (1스쿱)' }
     ]},
     { time: '20:00', name: '운동 후 저녁', items: [
@@ -87,7 +87,7 @@ const mealTemplates = {
     { time: '19:30', name: '저녁', items: [
       { food: '고구마',      basePer70: 150, unit: 'g' },
       { food: '연어 (구이)', basePer70: 150, unit: 'g' },
-      { food: '브로콜리',   basePer70: 150, unit: 'g' }
+      { food: '브로콜리',    basePer70: 150, unit: 'g' }
     ]},
     { time: '21:30', name: '취침 전 (선택)', items: [
       { food: '카제인 프로틴', basePer70: 25, unit: 'g (1스쿱)' }
@@ -130,10 +130,8 @@ const uploadInner = document.getElementById('uploadInner');
 
 if (uploadBox && fileInput && uploadInner) {
 
-  // 업로드 박스 전체 클릭 → 파일 선택창 (실제 저장은 analysis.js)
   uploadBox.addEventListener('click', () => fileInput.click());
 
-  // 드래그앤드롭 → 파일 input 에 위임 (analysis.js 의 change 이벤트가 단일 처리)
   uploadBox.addEventListener('dragover', (e) => {
     e.preventDefault();
     uploadBox.classList.add('drag-over');
@@ -179,7 +177,6 @@ if (uploadBox && fileInput && uploadInner) {
     if (!height || height < 100 || height > 250) { alert('키를 올바르게 입력해주세요. (100~250cm)'); return; }
     if (!weight || weight < 20  || weight > 300)  { alert('체중을 올바르게 입력해주세요. (20~300kg)'); return; }
     if (!age    || age < 10     || age > 100)      { alert('나이를 올바르게 입력해주세요. (10~100세)'); return; }
-    // 체지방률은 선택 — 비워두면 키·체중으로 자동 계산. 입력했을 때만 범위 검사.
     if (bodyFat && (bodyFat < 3 || bodyFat > 60)) {
       alert('체지방률은 3~60% 사이로 입력해주세요. (모르면 비워두세요)');
       const bfInput = document.getElementById('bodyFatInput');
@@ -206,23 +203,18 @@ if (uploadBox && fileInput && uploadInner) {
 
 // ===== 분석 계산 =====
 function analyzeBody() {
-  // 버그4 수정: 체중 등 사용자 정보를 Store에 동기화해 단일 출처로 만든다.
-  // (renderDiet 은 Store의 weight를 읽으므로, analyzeBody의 userInfo와 어긋나지 않게 맞춤)
-  // 기존 저장값을 덮어쓰지 않도록 병합(merge) 처리.
   if (typeof Store !== 'undefined') {
-    const prevUser = Store.get('fittube_user') || {};
-    Store.set('fittube_user', { ...prevUser, ...userInfo });
+    const prevUser = Store.get(STORAGE_KEYS.USER) || {};
+    Store.set(STORAGE_KEYS.USER, { ...prevUser, ...userInfo });
   }
 
-  const h       = userInfo.height / 100;
-  const rawBmi  = userInfo.weight / (h * h);
+  const h      = userInfo.height / 100;
+  const rawBmi = userInfo.weight / (h * h);
 
-  // ✅ 우선순위: 1) Claude Vision AI 결과 → 2) 사진 해시 시뮬레이션
   const aiResult   = (typeof Store !== 'undefined') ? Store.get(STORAGE_KEYS.AI_RESULT) : null;
   const photoScore = (typeof Store !== 'undefined' && Store.get(STORAGE_KEYS.PHOTO_SCORE)) || 0.5;
 
-  // 우선순위: 1) 사용자 직접 입력 → 2) AI 분석 → 3) 시뮬레이션
-  const userBodyFat = parseFloat(document.getElementById('bodyFatInput')?.value);
+  const userBodyFat  = parseFloat(document.getElementById('bodyFatInput')?.value);
   const hasUserInput = !isNaN(userBodyFat) && userBodyFat >= 3 && userBodyFat <= 60;
 
   let bmi, bodyFat;
@@ -233,7 +225,6 @@ function analyzeBody() {
     bmi     = Math.max(15, Math.min(40, rawBmi + (aiResult.bmiAdjust || 0)));
     bodyFat = Math.max(5, Math.min(45, aiResult.bodyFat));
   } else {
-    // 시뮬레이션 — 사진 점수 + BMI 결합 (사진 60% / BMI 40%)
     bmi = rawBmi;
     const photoBased = 6 + photoScore * 32;
     const sexFactor  = userInfo.gender === '남' ? 1 : 0;
@@ -249,7 +240,6 @@ function analyzeBody() {
 
   const tdee = Math.round(bmr * userInfo.activity);
 
-  // 목표 추천 (BMI 기반) — 단백질 계산에 쓰이므로 여기서 먼저 결정
   let bmiStatus     = '정상';
   let recommendGoal = '유지';
   if (bmi < 18.5)    { bmiStatus = '저체중'; recommendGoal = '벌크업'; }
@@ -257,8 +247,6 @@ function analyzeBody() {
   else if (bmi < 25) { bmiStatus = '과체중'; recommendGoal = '다이어트'; }
   else               { bmiStatus = '비만';   recommendGoal = '다이어트'; }
 
-  // 근육량 (골격근 %): AI 우선, 없으면 제지방의 44% (의학 평균)
-  // 제지방 = 체중 - 체지방. 그 중 근육 44%, 수분/뼈/장기 56%
   const muscleMass = (aiResult && typeof aiResult.muscle === 'number')
     ? Math.round(aiResult.muscle * 10) / 10
     : (() => {
@@ -267,15 +255,12 @@ function analyzeBody() {
         return Math.round((leanMass * 0.44 / userInfo.weight) * 100 * 10) / 10;
       })();
 
-  // 단백질 권장량 — 식단 요약(renderDiet)과 동일한 목표별 기준 사용 (수치 불일치 방지)
   const protein = Math.round(userInfo.weight * dietConfig[recommendGoal].proteinPerKg);
 
-  // 대시보드 카드 제거됨 — ID 없어도 에러 안 나게 안전 가드
   const setText = (id, val) => {
     const el = document.getElementById(id);
     if (el) el.textContent = val;
   };
-  // step2 먼저 표시 후 수치 채우기 (display:none 상태에서 렌더 보장)
   const step2El = document.getElementById('step2');
   if (step2El) step2El.style.display = 'block';
 
@@ -286,7 +271,6 @@ function analyzeBody() {
   setText('mmValue', muscleMass.toFixed(1));
   setText('proteinValue', protein);
 
-  // 계산 결과를 전역에 저장 (analysis.js 의 saveAnalysisToStorage 가 읽음)
   window.lastMetrics = {
     bmi:     bmi.toFixed(1),
     bmr:     String(Math.round(bmr)),
@@ -298,20 +282,17 @@ function analyzeBody() {
 
   setText('bmiStatus', bmiStatus);
 
-  // HUD 상단 키/체중 표시
   const hudH = document.getElementById('hudHeight');
   const hudW = document.getElementById('hudWeight');
   if (hudH) hudH.textContent = userInfo.height;
   if (hudW) hudW.textContent = userInfo.weight;
 
-  // BMI 도넛 게이지 애니메이션 (BMI 10~35 범위를 0~314 원둘레로 매핑)
   const donutFill = document.getElementById('bmiDonutFill');
   if (donutFill) {
     const pct = Math.min(Math.max((bmi - 10) / 25, 0), 1);
     const dash = Math.round(pct * 314);
     setTimeout(() => {
       donutFill.style.strokeDasharray = `${dash} 314`;
-      // 정상(18.5~23): 초록, 과체중: 주황, 비만: 빨강, 저체중: 파랑
       donutFill.style.stroke = bmi < 18.5 ? '#00d4ff' : bmi < 23 ? '#00ff88' : bmi < 25 ? '#ff8800' : '#ff0033';
     }, 200);
   }
@@ -398,19 +379,17 @@ function showDay(idx) {
   setTimeout(() => document.getElementById('step4').scrollIntoView({ behavior: 'smooth' }), 100);
 }
 
-// ===== 근육 그림 렌더 (부위별 이미지) =====
-// 본인이 받는 톤: 흰 배경 + 빨간 근육 강조 운동 동작 일러스트
-// ⚠ 배포 안전을 위해 한글/공백 없는 'images/' 사용 — 실제 폴더명도 'images'로 변경해야 함
+// ===== 근육 그림 렌더 =====
 const MUSCLE_IMG_BASE = 'images/';
 const muscleImageByPart = {
-  '가슴':  MUSCLE_IMG_BASE + 'chest.jpg',
-  '등':    MUSCLE_IMG_BASE + 'back.png',
-  '하체':  MUSCLE_IMG_BASE + 'leg.png',
-  '어깨':  MUSCLE_IMG_BASE + 'shoulder.jpg',
-  '팔':    MUSCLE_IMG_BASE + 'arm.png',
-  '복근':  MUSCLE_IMG_BASE + 'abs.jpg',
+  '가슴':   MUSCLE_IMG_BASE + 'chest.jpg',
+  '등':     MUSCLE_IMG_BASE + 'back.png',
+  '하체':   MUSCLE_IMG_BASE + 'leg.png',
+  '어깨':   MUSCLE_IMG_BASE + 'shoulder.jpg',
+  '팔':     MUSCLE_IMG_BASE + 'arm.png',
+  '복근':   MUSCLE_IMG_BASE + 'abs.jpg',
   '유산소': null,
-  '휴식':  null
+  '휴식':   null
 };
 
 const partEmojiBig = {
@@ -424,7 +403,6 @@ function renderMuscleMap(part) {
 
   const imageSrc = muscleImageByPart[part];
 
-  // 휴식의 날
   if (part === '휴식') {
     wrap.innerHTML = `
       <div class="muscle-rest">
@@ -434,7 +412,6 @@ function renderMuscleMap(part) {
     return;
   }
 
-  // 이미지 없으면 — 큰 이모지 + 부위명 (임시 디자인)
   if (!imageSrc) {
     const emoji = partEmojiBig[part] || '💪';
     wrap.innerHTML = `
@@ -447,7 +424,6 @@ function renderMuscleMap(part) {
     return;
   }
 
-  // 이미지 있을 때 — 부위 그림 + 부위명만 (깔끔하게)
   wrap.innerHTML = `
     <div class="muscle-card">
       <div class="muscle-image-wrap">
@@ -461,14 +437,13 @@ function renderMuscleMap(part) {
 
 // ===== 식단 렌더 =====
 function renderDiet() {
-  const config    = dietConfig[currentGoal];
-  // Store에서 최신 체중 읽기 (plan 페이지에서도 정확하게 반영)
-  const storedUser = (typeof Store !== 'undefined') ? Store.get('fittube_user') : null;
-  const w         = (storedUser && storedUser.weight) ? parseFloat(storedUser.weight) : userInfo.weight;
-  const totalKcal = Math.round(w * config.kcalPerKg);
-  const totalP    = Math.round(w * config.proteinPerKg);
-  const totalC    = Math.round((totalKcal * config.carbRatio) / 4);
-  const totalF    = Math.round((totalKcal * config.fatRatio) / 9);
+  const config     = dietConfig[currentGoal];
+  const storedUser = (typeof Store !== 'undefined') ? Store.get(STORAGE_KEYS.USER) : null;
+  const w          = (storedUser && storedUser.weight) ? parseFloat(storedUser.weight) : userInfo.weight;
+  const totalKcal  = Math.round(w * config.kcalPerKg);
+  const totalP     = Math.round(w * config.proteinPerKg);
+  const totalC     = Math.round((totalKcal * config.carbRatio) / 4);
+  const totalF     = Math.round((totalKcal * config.fatRatio) / 9);
 
   document.getElementById('dietSummary').innerHTML = `
     <div class="summary-grid">
@@ -493,7 +468,10 @@ function renderDiet() {
           const amt = Math.round(i.basePer70 * scale);
           return `<div class="meal-item">
             <div class="mi-food">${i.food}</div>
-            <div class="mi-amount">${amt}${i.unit.startsWith('g') ? '' : ' '}${i.unit}</div>
+            <div class="mi-right">
+              <div class="mi-amount">${amt}${i.unit.startsWith('g') ? '' : ' '}${i.unit}</div>
+              <a href="https://www.coupang.com/np/search?q=${encodeURIComponent(i.food)}" target="_blank" class="shop-btn">🛒</a>
+            </div>
           </div>`;
         }).join('')}
       </div>
