@@ -25,17 +25,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function calcAvgWeight() {
     const user = (typeof Store !== 'undefined') ? Store.get(STORAGE_KEYS.USER) : null;
     const sorted = Weights.sorted();
-    // 기록이 없으면 분석에서 입력한 체중 사용
     if (!sorted.length) {
       return user?.weight ? parseFloat(user.weight).toFixed(1) : null;
     }
-    // 최근 30일 기록만 평균 (오래된 기본값 70 오염 방지)
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 30);
-    const recent = sorted.filter(d => new Date(d.date) >= cutoff);
-    const arr = recent.length ? recent : sorted.slice(-1); // 최근 30일 없으면 마지막 1개
-    const sum = arr.reduce((acc, d) => acc + d.kg, 0);
-    return (sum / arr.length).toFixed(1);
+    // 가장 최근 기록 1개만 표시
+    return sorted.slice(-1)[0].kg.toFixed(1);
   }
 
   function render() {
@@ -70,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="stats-card">
           <div class="stats-val">${avgWeight ?? '--'}<span class="stats-unit">kg</span></div>
-          <div class="stats-label">평균 체중</div>
+          <div class="stats-label">현재 체중</div>
         </div>
         <div class="stats-card ${goalKg && latestKg && Math.abs(latestKg - goalKg) < 0.1 ? 'reached' : ''}">
           <div class="stats-val">${goalKg ? goalKg + '<span class="stats-unit">kg</span>' : '--'}</div>
