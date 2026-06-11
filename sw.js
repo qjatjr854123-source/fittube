@@ -7,7 +7,7 @@
    파일을 수정하면 CACHE_VERSION 숫자를 올려야 새 버전이 반영됨.
    ============================================ */
 
-const CACHE_VERSION = 'fittube-v5';
+const CACHE_VERSION = 'fittube-v6';
 
 // 오프라인에서도 열려야 하는 핵심 파일들
 const CORE_ASSETS = [
