@@ -196,6 +196,8 @@ document.addEventListener('DOMContentLoaded', () => {
     Store.set(STORAGE_KEYS.USER, { ...prevUser, weight: kg });
     render();
     if (typeof window.refreshBadges === 'function') window.refreshBadges();
+    // 식단 즉시 갱신
+    if (typeof renderDiet === 'function') renderDiet();
 
     // 저장 피드백
     saveBtn.textContent = '저장됨 ✓';
